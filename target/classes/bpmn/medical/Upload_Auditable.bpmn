@@ -16,7 +16,7 @@
     </bpmn:receiveTask>
     <bpmn:callActivity id="JIO_Upload" name="JIO_Upload" camunda:asyncBefore="true" camunda:exclusive="false" calledElement="JIO_Upload">
       <bpmn:extensionElements>
-        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in businessKey="#{BK_JIOUpload}" />
         <camunda:out source="BK_legacy" target="BK_legacy" />
         <camunda:out source="BK_Dasys" target="BK_Dasys" />
       </bpmn:extensionElements>
