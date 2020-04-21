@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: be.yelido.camundaserver.RandomsTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.062 s <<< FAILURE! - in be.yelido.camundaserver.RandomsTests
+testMultiInstanceProcess  Time elapsed: 0.061 s  <<< ERROR!
+org.springframework.web.client.HttpClientErrorException$BadRequest: 400 : [{"type":"InvalidRequestException","message":"Cannot instantiate process definition 6d93acad-7f05-11ea-ab12-025041000001: Unsupported value type 'Json'"}]
+	at be.yelido.camundaserver.RandomsTests.testMultiInstanceProcess(RandomsTests.java:39)
+

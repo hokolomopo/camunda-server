@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1tixxbw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="JIO_Upload" name="JIO_Upload" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_047xkzd</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_047xkzd" sourceRef="StartEvent_1" targetRef="JioUploadIntegrationProcessor_process" />
+    <bpmn:receiveTask id="JioUploadIntegrationProcessor_process" name="JioUploadIntegrationProcessor" messageRef="Message_0agyqx7">
+      <bpmn:incoming>Flow_047xkzd</bpmn:incoming>
+      <bpmn:outgoing>Flow_0htz8eh</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="Flow_0htz8eh" sourceRef="JioUploadIntegrationProcessor_process" targetRef="IntegrationController_integrate" />
+    <bpmn:receiveTask id="IntegrationController_integrate" name="IntegrationController" messageRef="Message_1a0uqvj">
+      <bpmn:incoming>Flow_0htz8eh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yhwoa2</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:subProcess id="Activity_1g3ay8l" name="" triggeredByEvent="true">
+      <bpmn:startEvent id="Event_10l8guk" name="Error">
+        <bpmn:outgoing>Flow_1sgqw32</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_1hommjr" messageRef="Message_0gu8obj" />
+      </bpmn:startEvent>
+      <bpmn:endEvent id="Event_13e377g">
+        <bpmn:incoming>Flow_1sgqw32</bpmn:incoming>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_0dule7o" errorRef="Error_0hr7il3" />
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_1sgqw32" sourceRef="Event_10l8guk" targetRef="Event_13e377g" />
+    </bpmn:subProcess>
+    <bpmn:receiveTask id="IntegrationController_SendToLegacy" name="SendToLegacy" messageRef="Message_1xjfj4k">
+      <bpmn:incoming>Flow_1qcm9kn</bpmn:incoming>
+      <bpmn:outgoing>Flow_08409i0</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="Flow_0yhwoa2" sourceRef="IntegrationController_integrate" targetRef="IntegrationController_SendToDasys" />
+    <bpmn:endEvent id="Event_0oru3qs" name="Create Legacy Subprocess in parent">
+      <bpmn:incoming>Flow_08409i0</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_13r5fqd" camunda:class="be.yelido.camundaserver.deleguates.SendMsgToParent">
+        <bpmn:extensionElements>
+          <camunda:field name="msgName">
+            <camunda:expression>ESBLegacy_msg</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var1">
+            <camunda:string>BK_Legacy</camunda:string>
+          </camunda:field>
+        </bpmn:extensionElements>
+      </bpmn:messageEventDefinition>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_08409i0" sourceRef="IntegrationController_SendToLegacy" targetRef="Event_0oru3qs" />
+    <bpmn:receiveTask id="IntegrationController_SendToDasys" name="SendToDasys" messageRef="Message_16ac4vo">
+      <bpmn:incoming>Flow_0yhwoa2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qcm9kn</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0u10k7f</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:endEvent id="Event_1yw5vcx" name="Create Dasys Subprocess in parent">
+      <bpmn:incoming>Flow_0u10k7f</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_07jw8oh" camunda:class="be.yelido.camundaserver.deleguates.SendMsgToParent">
+        <bpmn:extensionElements>
+          <camunda:field name="msgName">
+            <camunda:expression>ESBDasys_msg</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var1">
+            <camunda:string>BK_Dasys</camunda:string>
+          </camunda:field>
+        </bpmn:extensionElements>
+      </bpmn:messageEventDefinition>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1qcm9kn" sourceRef="IntegrationController_SendToDasys" targetRef="IntegrationController_SendToLegacy" />
+    <bpmn:sequenceFlow id="Flow_0u10k7f" sourceRef="IntegrationController_SendToDasys" targetRef="Event_1yw5vcx" />
+  </bpmn:process>
+  <bpmn:message id="Message_0agyqx7" name="JioUploadIntegrationProcessor_process_mdg" />
+  <bpmn:message id="Message_1a0uqvj" name="IntegrationController_integrate_msg" />
+  <bpmn:message id="Message_1xjfj4k" name="IntegrationController_SendToLegacy_msg" />
+  <bpmn:message id="Message_16ac4vo" name="IntegrationController_SendToDasys_msg" />
+  <bpmn:message id="Message_0gu8obj" name="msg" />
+  <bpmn:error id="Error_0hr7il3" name="Error_0lldo97" errorCode="error" camunda:errorMessage="An error happened" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="JIO_Upload">
+      <bpmndi:BPMNEdge id="Flow_0u10k7f_di" bpmnElement="Flow_0u10k7f">
+        <di:waypoint x="660" y="117" />
+        <di:waypoint x="681" y="117" />
+        <di:waypoint x="681" y="210" />
+        <di:waypoint x="702" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qcm9kn_di" bpmnElement="Flow_1qcm9kn">
+        <di:waypoint x="660" y="117" />
+        <di:waypoint x="710" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08409i0_di" bpmnElement="Flow_08409i0">
+        <di:waypoint x="810" y="117" />
+        <di:waypoint x="862" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yhwoa2_di" bpmnElement="Flow_0yhwoa2">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="560" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0htz8eh_di" bpmnElement="Flow_0htz8eh">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_047xkzd_di" bpmnElement="Flow_047xkzd">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1kexpz8_di" bpmnElement="JioUploadIntegrationProcessor_process">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_017a1s7_di" bpmnElement="IntegrationController_integrate">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1a51wvs_di" bpmnElement="Activity_1g3ay8l" isExpanded="true">
+        <dc:Bounds x="680" y="380" width="193" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1sgqw32_di" bpmnElement="Flow_1sgqw32">
+        <di:waypoint x="753" y="440" />
+        <di:waypoint x="817" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1lgpdaf_di" bpmnElement="Event_10l8guk">
+        <dc:Bounds x="717" y="422" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="722" y="465" width="26" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05z8gsb_di" bpmnElement="Event_13e377g">
+        <dc:Bounds x="817" y="422" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fl0efu_di" bpmnElement="IntegrationController_SendToLegacy">
+        <dc:Bounds x="710" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0oru3qs_di" bpmnElement="Event_0oru3qs">
+        <dc:Bounds x="862" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="844" y="142" width="73" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gg41ab_di" bpmnElement="IntegrationController_SendToDasys">
+        <dc:Bounds x="560" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1yw5vcx_di" bpmnElement="Event_1yw5vcx">
+        <dc:Bounds x="702" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="685" y="235" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

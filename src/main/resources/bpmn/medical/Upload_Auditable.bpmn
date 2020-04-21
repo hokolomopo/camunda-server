@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0nrv6bl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:message id="Message_123n5uw" name="UploadServiceImpl_uploadAuditable_msg" />
+  <bpmn:message id="Message_1ueejzn" name="SynchroController_integrateDataSource_msg" />
+  <bpmn:process id="Upload_Auditable" name="Upload_Auditable" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_09z6ve3</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="UploadServiceImpl_uploadAuditable" name="UploadServiceImpl" messageRef="Message_123n5uw">
+      <bpmn:incoming>Flow_09z6ve3</bpmn:incoming>
+      <bpmn:outgoing>Flow_162qphk</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="SynchroController_integrateDataSource" name="SynchroController" camunda:asyncBefore="true" messageRef="Message_1ueejzn">
+      <bpmn:incoming>Flow_162qphk</bpmn:incoming>
+      <bpmn:outgoing>Flow_17mglx8</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:callActivity id="JIO_Upload" name="JIO_Upload" camunda:asyncBefore="true" camunda:exclusive="false" calledElement="JIO_Upload">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:out source="BK_legacy" target="BK_legacy" />
+        <camunda:out source="BK_Dasys" target="BK_Dasys" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_17mglx8</bpmn:incoming>
+      <bpmn:incoming>Flow_0sdpu1r</bpmn:incoming>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_17mglx8" sourceRef="SynchroController_integrateDataSource" targetRef="JIO_Upload" />
+    <bpmn:sequenceFlow id="Flow_162qphk" sourceRef="UploadServiceImpl_uploadAuditable" targetRef="SynchroController_integrateDataSource" />
+    <bpmn:sequenceFlow id="Flow_09z6ve3" sourceRef="StartEvent_1" targetRef="UploadServiceImpl_uploadAuditable" />
+    <bpmn:subProcess id="Activity_1yd4ch8" triggeredByEvent="true">
+      <bpmn:callActivity id="Activity_05x79pw" name="Orchestrator : ProcessWorker" calledElement="Orchestrator_Rest">
+        <bpmn:extensionElements>
+          <camunda:in businessKey="#{BK}" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0sc4yru</bpmn:incoming>
+        <bpmn:outgoing>Flow_14snqz5</bpmn:outgoing>
+        <bpmn:multiInstanceLoopCharacteristics camunda:collection="${ESB_Bks}" camunda:elementVariable="BK" />
+      </bpmn:callActivity>
+      <bpmn:endEvent id="Event_0be4vhz">
+        <bpmn:incoming>Flow_14snqz5</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_14snqz5" sourceRef="Activity_05x79pw" targetRef="Event_0be4vhz" />
+      <bpmn:startEvent id="Event_0jplamo" isInterrupting="false">
+        <bpmn:outgoing>Flow_11o2ig9</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_1bulfma" messageRef="Message_0qub777" />
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_11o2ig9" sourceRef="Event_0jplamo" targetRef="ESB_Notification_Legacy" />
+      <bpmn:callActivity id="ESB_Notification_Legacy" name="ESB_Notification_Legacy" camunda:asyncBefore="true" calledElement="ESB_Notification">
+        <bpmn:extensionElements>
+          <camunda:in businessKey="#{BK_Legacy}" />
+          <camunda:out source="destination" target="ESB_destination" />
+          <camunda:out source="restCallsBKs" target="ESB_Bks" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_11o2ig9</bpmn:incoming>
+        <bpmn:incoming>Flow_1qzevp6</bpmn:incoming>
+        <bpmn:outgoing>Flow_0sc4yru</bpmn:outgoing>
+      </bpmn:callActivity>
+      <bpmn:receiveTask id="Activity_1h8ltnq" name="Handle Error">
+        <bpmn:incoming>Flow_1ink1e8</bpmn:incoming>
+        <bpmn:outgoing>Flow_1qzevp6</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:sequenceFlow id="Flow_1ink1e8" sourceRef="Event_1m1zo33" targetRef="Activity_1h8ltnq" />
+      <bpmn:boundaryEvent id="Event_1m1zo33" attachedToRef="ESB_Notification_Legacy">
+        <bpmn:outgoing>Flow_1ink1e8</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_0cqggo7" errorRef="Error_0ighybi" camunda:errorMessageVariable="Esb_Legacy_Error" />
+      </bpmn:boundaryEvent>
+      <bpmn:sequenceFlow id="Flow_0sc4yru" sourceRef="ESB_Notification_Legacy" targetRef="Activity_05x79pw" />
+      <bpmn:sequenceFlow id="Flow_1qzevp6" sourceRef="Activity_1h8ltnq" targetRef="ESB_Notification_Legacy" />
+    </bpmn:subProcess>
+    <bpmn:receiveTask id="Activity_04wljw3" name="Handle Error">
+      <bpmn:incoming>Flow_1aqfk8g</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sdpu1r</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="Event_0d3zto6" attachedToRef="JIO_Upload">
+      <bpmn:outgoing>Flow_1aqfk8g</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_166s5nz" errorRef="Error_0ighybi" camunda:errorMessageVariable="Error_msg" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1aqfk8g" sourceRef="Event_0d3zto6" targetRef="Activity_04wljw3" />
+    <bpmn:subProcess id="Activity_19el9j7" triggeredByEvent="true">
+      <bpmn:callActivity id="Activity_01l7n2n" name="Orchestrator : ProcessEmployee" calledElement="Orchestrator_Rest">
+        <bpmn:extensionElements>
+          <camunda:in businessKey="#{BK}" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_02xkjjj</bpmn:incoming>
+        <bpmn:outgoing>Flow_0a0u98y</bpmn:outgoing>
+        <bpmn:multiInstanceLoopCharacteristics camunda:collection="${ESB_BKs}" camunda:elementVariable="BK" />
+      </bpmn:callActivity>
+      <bpmn:endEvent id="Event_114elp9">
+        <bpmn:incoming>Flow_0a0u98y</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:callActivity id="ESB_Notification_DaSyS" name="ESB_Notification_DaSyS" camunda:asyncBefore="true" calledElement="ESB_Notification">
+        <bpmn:extensionElements>
+          <camunda:out source="nbrOfFlows" target="ESB_nbrOfFlows" local="true" />
+          <camunda:out source="destination" target="ESB_destination" local="true" />
+          <camunda:in businessKey="#{BK_Dasys}" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0aa0sjt</bpmn:incoming>
+        <bpmn:incoming>Flow_1mejerz</bpmn:incoming>
+        <bpmn:outgoing>Flow_02xkjjj</bpmn:outgoing>
+      </bpmn:callActivity>
+      <bpmn:sequenceFlow id="Flow_0aa0sjt" sourceRef="Event_1cf70s7" targetRef="ESB_Notification_DaSyS" />
+      <bpmn:sequenceFlow id="Flow_0a0u98y" sourceRef="Activity_01l7n2n" targetRef="Event_114elp9" />
+      <bpmn:startEvent id="Event_1cf70s7" isInterrupting="false">
+        <bpmn:outgoing>Flow_0aa0sjt</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_1nckysm" messageRef="Message_1036lil" />
+      </bpmn:startEvent>
+      <bpmn:boundaryEvent id="Event_08d2wpq" attachedToRef="ESB_Notification_DaSyS">
+        <bpmn:outgoing>Flow_1x786mb</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_05yyer3" errorRef="Error_0ighybi" camunda:errorMessageVariable="Esb_Legacy_Error" />
+      </bpmn:boundaryEvent>
+      <bpmn:sequenceFlow id="Flow_1x786mb" sourceRef="Event_08d2wpq" targetRef="Activity_0pkkx4w" />
+      <bpmn:receiveTask id="Activity_0pkkx4w" name="Handle Error">
+        <bpmn:incoming>Flow_1x786mb</bpmn:incoming>
+        <bpmn:outgoing>Flow_1mejerz</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:sequenceFlow id="Flow_02xkjjj" sourceRef="ESB_Notification_DaSyS" targetRef="Activity_01l7n2n" />
+      <bpmn:sequenceFlow id="Flow_1mejerz" sourceRef="Activity_0pkkx4w" targetRef="ESB_Notification_DaSyS" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_0sdpu1r" sourceRef="Activity_04wljw3" targetRef="JIO_Upload" />
+  </bpmn:process>
+  <bpmn:error id="Error_00mppjs" name="Unexpected_Desination" errorCode="Unexpected_Desination_ESBLegacy" camunda:errorMessage="Unexpected Desination from ESB Notification Legacy" />
+  <bpmn:error id="Error_1rpki08" name="Unexpected_Desination" errorCode="Unexpected_Desination_ESBDasys" camunda:errorMessage="Unexpected Desination from ESB Notification Dasys" />
+  <bpmn:message id="Message_0fyisae" name="msg" />
+  <bpmn:message id="Message_0qub777" name="ESBLegacy_msg" />
+  <bpmn:signal id="Signal_02mq65u" name="signal" />
+  <bpmn:message id="Message_1ecgigg" name="Message_3933lvc" />
+  <bpmn:message id="Message_1036lil" name="ESBDasys_msg" />
+  <bpmn:error id="Error_0ighybi" name="Error_3c2pqsn" errorCode="Error" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Upload_Auditable">
+      <bpmndi:BPMNEdge id="Flow_1aqfk8g_di" bpmnElement="Flow_1aqfk8g">
+        <di:waypoint x="720" y="309" />
+        <di:waypoint x="720" y="290" />
+        <di:waypoint x="700" y="290" />
+        <di:waypoint x="700" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09z6ve3_di" bpmnElement="Flow_09z6ve3">
+        <di:waypoint x="215" y="367" />
+        <di:waypoint x="270" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_162qphk_di" bpmnElement="Flow_162qphk">
+        <di:waypoint x="370" y="367" />
+        <di:waypoint x="430" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17mglx8_di" bpmnElement="Flow_17mglx8">
+        <di:waypoint x="530" y="367" />
+        <di:waypoint x="620" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sdpu1r_di" bpmnElement="Flow_0sdpu1r">
+        <di:waypoint x="670" y="270" />
+        <di:waypoint x="670" y="299" />
+        <di:waypoint x="640" y="299" />
+        <di:waypoint x="640" y="327" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="349" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1m4cngt_di" bpmnElement="UploadServiceImpl_uploadAuditable">
+        <dc:Bounds x="270" y="327" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1r3n4f7_di" bpmnElement="SynchroController_integrateDataSource">
+        <dc:Bounds x="430" y="327" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19a00p2_di" bpmnElement="JIO_Upload">
+        <dc:Bounds x="620" y="327" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pb75d2_di" bpmnElement="Activity_1yd4ch8" isExpanded="true">
+        <dc:Bounds x="820" y="70" width="598" height="315" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1ink1e8_di" bpmnElement="Flow_1ink1e8">
+        <di:waypoint x="1040" y="182" />
+        <di:waypoint x="1040" y="130" />
+        <di:waypoint x="980" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11o2ig9_di" bpmnElement="Flow_11o2ig9">
+        <di:waypoint x="878" y="240" />
+        <di:waypoint x="940" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14snqz5_di" bpmnElement="Flow_14snqz5">
+        <di:waypoint x="1230" y="240" />
+        <di:waypoint x="1332" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sc4yru_di" bpmnElement="Flow_0sc4yru">
+        <di:waypoint x="1040" y="240" />
+        <di:waypoint x="1130" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qzevp6_di" bpmnElement="Flow_1qzevp6">
+        <di:waypoint x="930" y="170" />
+        <di:waypoint x="930" y="185" />
+        <di:waypoint x="980" y="185" />
+        <di:waypoint x="980" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_132elkb_di" bpmnElement="Event_0jplamo">
+        <dc:Bounds x="842" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ag222u_di" bpmnElement="ESB_Notification_Legacy">
+        <dc:Bounds x="940" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1h8ltnq_di" bpmnElement="Activity_1h8ltnq">
+        <dc:Bounds x="880" y="90" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05x79pw_di" bpmnElement="Activity_05x79pw">
+        <dc:Bounds x="1130" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0be4vhz_di" bpmnElement="Event_0be4vhz">
+        <dc:Bounds x="1332" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0x45jb5_di" bpmnElement="Event_1m1zo33">
+        <dc:Bounds x="1022" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04wljw3_di" bpmnElement="Activity_04wljw3">
+        <dc:Bounds x="620" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_02kx4b8_di" bpmnElement="Activity_19el9j7" isExpanded="true">
+        <dc:Bounds x="820" y="440" width="598" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1x786mb_di" bpmnElement="Flow_1x786mb">
+        <di:waypoint x="1038" y="552" />
+        <di:waypoint x="1038" y="500" />
+        <di:waypoint x="988" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0a0u98y_di" bpmnElement="Flow_0a0u98y">
+        <di:waypoint x="1240" y="610" />
+        <di:waypoint x="1342" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aa0sjt_di" bpmnElement="Flow_0aa0sjt">
+        <di:waypoint x="876" y="610" />
+        <di:waypoint x="938" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02xkjjj_di" bpmnElement="Flow_02xkjjj">
+        <di:waypoint x="1038" y="610" />
+        <di:waypoint x="1140" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mejerz_di" bpmnElement="Flow_1mejerz">
+        <di:waypoint x="938" y="540" />
+        <di:waypoint x="938" y="555" />
+        <di:waypoint x="980" y="555" />
+        <di:waypoint x="980" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_153scrb_di" bpmnElement="ESB_Notification_DaSyS">
+        <dc:Bounds x="938" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1osvewc_di" bpmnElement="Event_1cf70s7">
+        <dc:Bounds x="840" y="592" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01l7n2n_di" bpmnElement="Activity_01l7n2n">
+        <dc:Bounds x="1140" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_114elp9_di" bpmnElement="Event_114elp9">
+        <dc:Bounds x="1342" y="592" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pid55n_di" bpmnElement="Activity_0pkkx4w">
+        <dc:Bounds x="888" y="460" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1oyh6e5_di" bpmnElement="Event_08d2wpq">
+        <dc:Bounds x="1020" y="552" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0txk649_di" bpmnElement="Event_0d3zto6">
+        <dc:Bounds x="702" y="309" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
