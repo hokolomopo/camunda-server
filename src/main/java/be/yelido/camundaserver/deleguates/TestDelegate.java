@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 public class TestDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
-        Object o = delegateExecution.getVariable("header_destination");
-        delegateExecution.setVariable("header_destination", o);
+        String var = (String)delegateExecution.getVariable("test");
+        delegateExecution.removeVariable("test");
+        delegateExecution.setVariableLocal("test", var);
     }
 }

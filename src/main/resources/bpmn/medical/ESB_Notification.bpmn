@@ -55,7 +55,9 @@
     </bpmn:endEvent>
     <bpmn:endEvent id="Event_03uarki">
       <bpmn:extensionElements>
-        <camunda:executionListener expression="{execution.setVariable(“destination”, “processEmployee”)}" event="start" />
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="Javascript">execution.setVariable("destination", "processEmployee");</camunda:script>
+        </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1adsjad</bpmn:incoming>
     </bpmn:endEvent>
@@ -153,22 +155,27 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headerDestination == null}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:subProcess id="Activity_0r80iu6" name="" triggeredByEvent="true">
-      <bpmn:startEvent id="Event_181r8q8" name="Error">
+      <bpmn:startEvent id="Event_181r8q8" name="Error" camunda:asyncBefore="true">
         <bpmn:outgoing>Flow_1cbgery</bpmn:outgoing>
         <bpmn:messageEventDefinition id="MessageEventDefinition_10houl9" messageRef="Message_0fobnhg" />
       </bpmn:startEvent>
       <bpmn:endEvent id="Event_0u908d7">
-        <bpmn:incoming>Flow_1cbgery</bpmn:incoming>
+        <bpmn:incoming>Flow_1g7fw3f</bpmn:incoming>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_1ajd6px" errorRef="Error_18tykap" />
       </bpmn:endEvent>
-      <bpmn:sequenceFlow id="Flow_1cbgery" sourceRef="Event_181r8q8" targetRef="Event_0u908d7" />
+      <bpmn:sequenceFlow id="Flow_1cbgery" sourceRef="Event_181r8q8" targetRef="Activity_0dacuu8" />
+      <bpmn:sequenceFlow id="Flow_1g7fw3f" sourceRef="Activity_0dacuu8" targetRef="Event_0u908d7" />
+      <bpmn:receiveTask id="Activity_0dacuu8" name="Incident" camunda:asyncBefore="true" messageRef="Message_07qy9zn">
+        <bpmn:incoming>Flow_1cbgery</bpmn:incoming>
+        <bpmn:outgoing>Flow_1g7fw3f</bpmn:outgoing>
+      </bpmn:receiveTask>
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_14folzd" name="ESBNotificationProcessor_process_msg" />
   <bpmn:message id="Message_1kq2e59" name="ESBNotificationProcessor_end_msg" />
-  <bpmn:message id="Message_07qy9zn" />
-  <bpmn:message id="Message_0fobnhg" name="msg" />
-  <bpmn:error id="Error_18tykap" name="Error_0lldo97" errorCode="error" camunda:errorMessage="An error happened" />
+  <bpmn:message id="Message_07qy9zn" name="Incident_msg" />
+  <bpmn:message id="Message_0fobnhg" name="Raise_Error_msg" />
+  <bpmn:error id="Error_18tykap" name="Execution_Error" errorCode="Execution_Error" camunda:errorMessage="${error_message}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ESB_Notification">
       <bpmndi:BPMNEdge id="Flow_1hwzp1x_di" bpmnElement="Flow_1hwzp1x">
@@ -376,20 +383,27 @@
         <dc:Bounds x="870" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0r80iu6_di" bpmnElement="Activity_0r80iu6" isExpanded="true">
-        <dc:Bounds x="350" y="260" width="193" height="120" />
+        <dc:Bounds x="220" y="260" width="323" height="120" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1cbgery_di" bpmnElement="Flow_1cbgery">
-        <di:waypoint x="423" y="320" />
+        <di:waypoint x="288" y="320" />
+        <di:waypoint x="330" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g7fw3f_di" bpmnElement="Flow_1g7fw3f">
+        <di:waypoint x="430" y="320" />
         <di:waypoint x="487" y="320" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_181r8q8_di" bpmnElement="Event_181r8q8">
-        <dc:Bounds x="387" y="302" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="392" y="345" width="26" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0u908d7_di" bpmnElement="Event_0u908d7">
         <dc:Bounds x="487" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_181r8q8_di" bpmnElement="Event_181r8q8">
+        <dc:Bounds x="252" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="257" y="345" width="26" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1y0cdmr_di" bpmnElement="Activity_0dacuu8">
+        <dc:Bounds x="330" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

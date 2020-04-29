@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0u9sv3t" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="Merge_Auditable" name="Merge Auditable" isExecutable="true">
+    <bpmn:startEvent id="Event_0o2awh1">
+      <bpmn:outgoing>Flow_1xvrzhy</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="Activity_1jn446o" name="Merge Encounters">
+      <bpmn:incoming>Flow_0smdizc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0704kyc</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${encouters_ids}" camunda:elementVariable="id" />
+      <bpmn:startEvent id="Event_1r4xca0">
+        <bpmn:outgoing>Flow_13ygrsg</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:exclusiveGateway id="Gateway_0kvt2dr" name="encounter Updated" camunda:asyncBefore="true" default="Flow_0o987n2">
+        <bpmn:incoming>Flow_10udi3p</bpmn:incoming>
+        <bpmn:outgoing>Flow_0o987n2</bpmn:outgoing>
+        <bpmn:outgoing>Flow_0ykd29v</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="Event_0zsp66j" name="Create prestation update subprocess in root">
+        <bpmn:incoming>Flow_0ykd29v</bpmn:incoming>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_0218gsr" camunda:class="be.yelido.camundaserver.deleguates.SendMsgToParent">
+          <bpmn:extensionElements>
+            <camunda:field name="msgName">
+              <camunda:expression>ESBLegacy_msg</camunda:expression>
+            </camunda:field>
+            <camunda:field name="var1">
+              <camunda:string>BK_Legacy</camunda:string>
+            </camunda:field>
+          </bpmn:extensionElements>
+        </bpmn:messageEventDefinition>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="Event_1do6jcy">
+        <bpmn:incoming>Flow_0o987n2</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_10udi3p" sourceRef="Check_Updates" targetRef="Gateway_0kvt2dr" />
+      <bpmn:sequenceFlow id="Flow_0o987n2" sourceRef="Gateway_0kvt2dr" targetRef="Event_1do6jcy" />
+      <bpmn:sequenceFlow id="Flow_0ykd29v" sourceRef="Gateway_0kvt2dr" targetRef="Event_0zsp66j">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${encounterUpdated == true}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="Flow_13ygrsg" sourceRef="Event_1r4xca0" targetRef="Check_Updates" />
+      <bpmn:receiveTask id="Check_Updates" name="Check for updates" camunda:asyncBefore="true" messageRef="Message_0u7e4qc">
+        <bpmn:incoming>Flow_13ygrsg</bpmn:incoming>
+        <bpmn:outgoing>Flow_10udi3p</bpmn:outgoing>
+      </bpmn:receiveTask>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_1xvrzhy" sourceRef="Event_0o2awh1" targetRef="Merge_Encounters" />
+    <bpmn:sequenceFlow id="Flow_0smdizc" sourceRef="Merge_Encounters" targetRef="Activity_1jn446o" />
+    <bpmn:sequenceFlow id="Flow_0704kyc" sourceRef="Activity_1jn446o" targetRef="MergeAcBases" />
+    <bpmn:sequenceFlow id="Flow_0kl3a1y" sourceRef="MergeAcBases" targetRef="Merge_AcLinks" />
+    <bpmn:endEvent id="Event_11ftfn9">
+      <bpmn:incoming>Flow_0na9er7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0na9er7" sourceRef="Merge_AcLinks" targetRef="Event_11ftfn9" />
+    <bpmn:receiveTask id="Merge_Encounters" name="Merge Encounters" camunda:asyncBefore="true" messageRef="Message_0zudwn2">
+      <bpmn:incoming>Flow_1xvrzhy</bpmn:incoming>
+      <bpmn:outgoing>Flow_0smdizc</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="MergeAcBases" name="Merge AcBases" camunda:asyncBefore="true" messageRef="Message_1q887v1">
+      <bpmn:incoming>Flow_0704kyc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kl3a1y</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="Merge_AcLinks" name="Merge AcLinks" camunda:asyncBefore="true" messageRef="Message_0obks43">
+      <bpmn:incoming>Flow_0kl3a1y</bpmn:incoming>
+      <bpmn:outgoing>Flow_0na9er7</bpmn:outgoing>
+    </bpmn:receiveTask>
+  </bpmn:process>
+  <bpmn:message id="Message_0zudwn2" name="Merge_Encounters_msg" />
+  <bpmn:message id="Message_0u7e4qc" name="Check_Updates_${id}_msg" />
+  <bpmn:message id="Message_1q887v1" name="MergeAcBases_msg" />
+  <bpmn:message id="Message_0obks43" name="Merge_AcLinks" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Merge_Auditable">
+      <bpmndi:BPMNEdge id="Flow_1xvrzhy_di" bpmnElement="Flow_1xvrzhy">
+        <di:waypoint x="208" y="180" />
+        <di:waypoint x="260" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0smdizc_di" bpmnElement="Flow_0smdizc">
+        <di:waypoint x="360" y="180" />
+        <di:waypoint x="420" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0704kyc_di" bpmnElement="Flow_0704kyc">
+        <di:waypoint x="940" y="180" />
+        <di:waypoint x="1000" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kl3a1y_di" bpmnElement="Flow_0kl3a1y">
+        <di:waypoint x="1100" y="180" />
+        <di:waypoint x="1160" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0na9er7_di" bpmnElement="Flow_0na9er7">
+        <di:waypoint x="1260" y="180" />
+        <di:waypoint x="1322" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0o2awh1_di" bpmnElement="Event_0o2awh1">
+        <dc:Bounds x="172" y="162" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11ftfn9_di" bpmnElement="Event_11ftfn9">
+        <dc:Bounds x="1322" y="162" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0rkdjfg_di" bpmnElement="Merge_Encounters">
+        <dc:Bounds x="260" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fp88kr_di" bpmnElement="MergeAcBases">
+        <dc:Bounds x="1000" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0p7sdvs_di" bpmnElement="Merge_AcLinks">
+        <dc:Bounds x="1160" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jn446o_di" bpmnElement="Activity_1jn446o" isExpanded="true">
+        <dc:Bounds x="420" y="80" width="520" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_10udi3p_di" bpmnElement="Flow_10udi3p">
+        <di:waypoint x="620" y="180" />
+        <di:waypoint x="675" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o987n2_di" bpmnElement="Flow_0o987n2">
+        <di:waypoint x="700" y="205" />
+        <di:waypoint x="700" y="240" />
+        <di:waypoint x="772" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ykd29v_di" bpmnElement="Flow_0ykd29v">
+        <di:waypoint x="700" y="155" />
+        <di:waypoint x="700" y="120" />
+        <di:waypoint x="772" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13ygrsg_di" bpmnElement="Flow_13ygrsg">
+        <di:waypoint x="496" y="180" />
+        <di:waypoint x="520" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1r4xca0_di" bpmnElement="Event_1r4xca0">
+        <dc:Bounds x="460" y="162" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0kvt2dr_di" bpmnElement="Gateway_0kvt2dr" isMarkerVisible="true">
+        <dc:Bounds x="675" y="155" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="724" y="166" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0zsp66j_di" bpmnElement="Event_0zsp66j">
+        <dc:Bounds x="772" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="817" y="103" width="85" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1do6jcy_di" bpmnElement="Event_1do6jcy">
+        <dc:Bounds x="772" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_09ept2b_di" bpmnElement="Check_Updates">
+        <dc:Bounds x="520" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
