@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1tixxbw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:message id="Message_0agyqx7" name="JioUploadIntegrationProcessor_process_msg" />
-  <bpmn:message id="Message_1a0uqvj" name="AuditableT0_Integrate_msg" />
+  <bpmn:message id="Message_1a0uqvj" name="AuditableT0_Merge_msg" />
   <bpmn:message id="Message_1xjfj4k" name="IntegrationController_SendToLegacy_msg" />
   <bpmn:message id="Message_16ac4vo" name="IntegrationController_SendToDasys_msg" />
   <bpmn:message id="Message_0gu8obj" name="Raise_Error_msg" />
@@ -13,7 +13,7 @@
     </bpmn:startEvent>
     <bpmn:receiveTask id="JioUploadIntegrationProcessor_process" name="JioUploadIntegrationProcessor" messageRef="Message_0agyqx7">
       <bpmn:incoming>Flow_047xkzd</bpmn:incoming>
-      <bpmn:outgoing>Flow_0jn7f0s</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0oumamz</bpmn:outgoing>
     </bpmn:receiveTask>
     <bpmn:receiveTask id="IntegrationController_SendToLegacy" name="SendToLegacy" messageRef="Message_1xjfj4k">
       <bpmn:incoming>Flow_1qcm9kn</bpmn:incoming>
@@ -50,17 +50,6 @@
         </bpmn:extensionElements>
       </bpmn:messageEventDefinition>
     </bpmn:endEvent>
-    <bpmn:receiveTask id="AuditableT0_Integrate" name="Integrate AuditableT0" camunda:asyncBefore="true" messageRef="Message_1a0uqvj">
-      <bpmn:incoming>Flow_0jn7f0s</bpmn:incoming>
-      <bpmn:outgoing>Flow_0gp6205</bpmn:outgoing>
-    </bpmn:receiveTask>
-    <bpmn:callActivity id="AuditableT0_Merge" name="Merge AuditableT0" camunda:asyncBefore="true" calledElement="Merge_Auditable">
-      <bpmn:extensionElements>
-        <camunda:in businessKey="#{mergeAuditableT0_BK}" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0gp6205</bpmn:incoming>
-      <bpmn:outgoing>Flow_1d5e87q</bpmn:outgoing>
-    </bpmn:callActivity>
     <bpmn:subProcess id="Activity_1g3ay8l" name="" triggeredByEvent="true">
       <bpmn:startEvent id="Event_10l8guk" name="Error" camunda:asyncBefore="true">
         <bpmn:outgoing>Flow_1sgqw32</bpmn:outgoing>
@@ -81,11 +70,8 @@
     <bpmn:sequenceFlow id="Flow_1qcm9kn" sourceRef="IntegrationController_SendToDasys" targetRef="IntegrationController_SendToLegacy" />
     <bpmn:sequenceFlow id="Flow_08409i0" sourceRef="IntegrationController_SendToLegacy" targetRef="Event_0oru3qs" />
     <bpmn:sequenceFlow id="Flow_047xkzd" sourceRef="StartEvent_1" targetRef="JioUploadIntegrationProcessor_process" />
-    <bpmn:sequenceFlow id="Flow_0gp6205" sourceRef="AuditableT0_Integrate" targetRef="AuditableT0_Merge" />
-    <bpmn:sequenceFlow id="Flow_1d5e87q" sourceRef="AuditableT0_Merge" targetRef="AuditableT0_MergeDAO" />
-    <bpmn:sequenceFlow id="Flow_07zvdgk" sourceRef="AuditableT0_MergeDAO" targetRef="AuditableT0_UpdatePostits" />
-    <bpmn:subProcess id="AuditableT1_Integrate_process" name="Integrate AuditableT1">
-      <bpmn:incoming>Flow_0ub9yhb</bpmn:incoming>
+    <bpmn:subProcess id="AuditableT1_Integrate_process" name="Integrate Auditables T1">
+      <bpmn:incoming>Flow_0lp4a58</bpmn:incoming>
       <bpmn:outgoing>Flow_0c8b7t2</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true">
         <bpmn:loopCardinality xsi:type="bpmn:tFormalExpression">${number_of_AuditableT1}</bpmn:loopCardinality>
@@ -108,7 +94,11 @@
         <bpmn:incoming>Flow_09r2bf0</bpmn:incoming>
         <bpmn:outgoing>Flow_0yov3le</bpmn:outgoing>
       </bpmn:receiveTask>
-      <bpmn:sequenceFlow id="Flow_1e2pej7" sourceRef="AuditableT1_Merge" targetRef="AuditableT1_MergeDAO" />
+      <bpmn:sequenceFlow id="Flow_1e2pej7" sourceRef="AuditableT1_Merge" targetRef="AuditableT1_MergeDAO">
+        <bpmn:extensionElements>
+          <camunda:executionListener expression="${execution.removeVariable(&#34;mergeAuditableT1_BK&#34;)}" event="take" />
+        </bpmn:extensionElements>
+      </bpmn:sequenceFlow>
       <bpmn:sequenceFlow id="Flow_09r2bf0" sourceRef="AuditableT1_MergeDAO" targetRef="AuditableT1_UpdatePostits" />
       <bpmn:sequenceFlow id="Flow_14ovo0n" sourceRef="Event_0dl7t3t" targetRef="AuditableT1_Integrate" />
       <bpmn:receiveTask id="AuditableT1_UpdateReports" name="UpdateReports" camunda:asyncBefore="true" messageRef="Message_02v0v9h">
@@ -130,197 +120,281 @@
       <bpmn:sequenceFlow id="Flow_0gvcw68" sourceRef="AuditableT1_CheckSynchroAssignement" targetRef="Event_0hkhzcr" />
       <bpmn:sequenceFlow id="Flow_0yov3le" sourceRef="AuditableT1_UpdatePostits" targetRef="AuditableT1_UpdateReports" />
       <bpmn:sequenceFlow id="Flow_02wa93g" sourceRef="AuditableT1_UpdateReports" targetRef="AuditableT1_ReintegrationController" />
-      <bpmn:receiveTask id="AuditableT1_Integrate" name="Integrate AuditableT1" camunda:asyncBefore="true" messageRef="Message_14ko9xi">
+      <bpmn:receiveTask id="AuditableT1_Integrate" name="Begin MergeAuditableT1" camunda:asyncBefore="true" messageRef="Message_14ko9xi">
+        <bpmn:extensionElements>
+          <camunda:executionListener class="be.yelido.camundaserver.deleguates.SetScopeToLocal" event="end">
+            <camunda:field name="var1">
+              <camunda:string>NameT1</camunda:string>
+            </camunda:field>
+            <camunda:field name="var2">
+              <camunda:string>UuidT1</camunda:string>
+            </camunda:field>
+            <camunda:field name="var3">
+              <camunda:string>SisNumber</camunda:string>
+            </camunda:field>
+            <camunda:field name="var4">
+              <camunda:string>WnNumber</camunda:string>
+            </camunda:field>
+            <camunda:field name="var5">
+              <camunda:string>RrNr</camunda:string>
+            </camunda:field>
+          </camunda:executionListener>
+        </bpmn:extensionElements>
         <bpmn:incoming>Flow_14ovo0n</bpmn:incoming>
         <bpmn:outgoing>Flow_1dv3yu8</bpmn:outgoing>
       </bpmn:receiveTask>
       <bpmn:sequenceFlow id="Flow_1dv3yu8" sourceRef="AuditableT1_Integrate" targetRef="AuditableT1_Merge" />
     </bpmn:subProcess>
-    <bpmn:receiveTask id="AuditableT0_MergeDAO" name="Merge DAO" camunda:asyncBefore="true" messageRef="Message_1foq346">
-      <bpmn:incoming>Flow_1d5e87q</bpmn:incoming>
-      <bpmn:outgoing>Flow_07zvdgk</bpmn:outgoing>
+    <bpmn:sequenceFlow id="Flow_0c8b7t2" sourceRef="AuditableT1_Integrate_process" targetRef="IntegrationController_SendToDasys">
+      <bpmn:extensionElements>
+        <camunda:executionListener expression="${execution.removeVariable(&#34;number_of_AuditableT1&#34;)}" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:subProcess id="Activity_0f9c2x8" name="Integrate Auditable T0">
+      <bpmn:incoming>Flow_0oumamz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1txlbdv</bpmn:outgoing>
+      <bpmn:startEvent id="Event_1fh60bz">
+        <bpmn:outgoing>Flow_1umelue</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="AuditableT0_Integrate" name="Begin MergeAuditableT0" camunda:asyncBefore="true" messageRef="Message_1a0uqvj">
+        <bpmn:incoming>Flow_1umelue</bpmn:incoming>
+        <bpmn:outgoing>Flow_0gp6205</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:callActivity id="AuditableT0_Merge" name="Merge AuditableT0" camunda:asyncBefore="true" calledElement="Merge_Auditable">
+        <bpmn:extensionElements>
+          <camunda:in businessKey="#{mergeAuditableT0_BK}" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0gp6205</bpmn:incoming>
+        <bpmn:outgoing>Flow_1d5e87q</bpmn:outgoing>
+      </bpmn:callActivity>
+      <bpmn:receiveTask id="AuditableT0_MergeDAO" name="Merge DAO" camunda:asyncBefore="true" messageRef="Message_1foq346">
+        <bpmn:incoming>Flow_1d5e87q</bpmn:incoming>
+        <bpmn:outgoing>Flow_07zvdgk</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:receiveTask id="AuditableT0_UpdatePostits" name="UpdatePostits" camunda:asyncBefore="true" messageRef="Message_0dxmtkj">
+        <bpmn:incoming>Flow_07zvdgk</bpmn:incoming>
+        <bpmn:outgoing>Flow_10j0d2k</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:sequenceFlow id="Flow_0gp6205" sourceRef="AuditableT0_Integrate" targetRef="AuditableT0_Merge" />
+      <bpmn:sequenceFlow id="Flow_1d5e87q" sourceRef="AuditableT0_Merge" targetRef="AuditableT0_MergeDAO">
+        <bpmn:extensionElements>
+          <camunda:executionListener expression="${execution.removeVariable(&#34;mergeAuditableT0_BK&#34;)}" event="take" />
+        </bpmn:extensionElements>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="Flow_07zvdgk" sourceRef="AuditableT0_MergeDAO" targetRef="AuditableT0_UpdatePostits" />
+      <bpmn:endEvent id="Event_1b9yjr9">
+        <bpmn:incoming>Flow_10j0d2k</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_10j0d2k" sourceRef="AuditableT0_UpdatePostits" targetRef="Event_1b9yjr9" />
+      <bpmn:sequenceFlow id="Flow_1umelue" sourceRef="Event_1fh60bz" targetRef="AuditableT0_Integrate" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_0oumamz" sourceRef="JioUploadIntegrationProcessor_process" targetRef="Activity_0f9c2x8" />
+    <bpmn:sequenceFlow id="Flow_1txlbdv" sourceRef="Activity_0f9c2x8" targetRef="Activity_1ryfs20" />
+    <bpmn:receiveTask id="Activity_1ryfs20" name="Begin Integration Auditables T1" camunda:asyncBefore="true" messageRef="Message_1y2qzdm">
+      <bpmn:incoming>Flow_1txlbdv</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lp4a58</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:receiveTask id="AuditableT0_UpdatePostits" name="UpdatePostits" camunda:asyncBefore="true" messageRef="Message_0dxmtkj">
-      <bpmn:incoming>Flow_07zvdgk</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ub9yhb</bpmn:outgoing>
-    </bpmn:receiveTask>
-    <bpmn:sequenceFlow id="Flow_0ub9yhb" sourceRef="AuditableT0_UpdatePostits" targetRef="AuditableT1_Integrate_process" />
-    <bpmn:sequenceFlow id="Flow_0jn7f0s" sourceRef="JioUploadIntegrationProcessor_process" targetRef="AuditableT0_Integrate" />
-    <bpmn:sequenceFlow id="Flow_0c8b7t2" sourceRef="AuditableT1_Integrate_process" targetRef="IntegrationController_SendToDasys" />
+    <bpmn:sequenceFlow id="Flow_0lp4a58" sourceRef="Activity_1ryfs20" targetRef="AuditableT1_Integrate_process" />
   </bpmn:process>
   <bpmn:message id="Message_1foq346" name="AuditableT0_MergeDAO_msg" />
   <bpmn:message id="Message_0dxmtkj" name="AuditableT0_UpdatePostits_msg" />
-  <bpmn:message id="Message_14ko9xi" name="AuditableT1_Integrate_msg" />
+  <bpmn:message id="Message_14ko9xi" name="AuditableT1_Merge_msg" />
   <bpmn:message id="Message_1sm7cjm" name="AuditableT1_MergeDAO_msg" />
   <bpmn:message id="Message_0baqge0" name="AuditableT1_UpdatePostits_msg" />
   <bpmn:message id="Message_02v0v9h" name="AuditableT1_UpdateReports_msg" />
   <bpmn:message id="Message_0ob80qw" name="AuditableT1_ReintegrationController_msg" />
-  <bpmn:message id="Message_1bbiwcb" name="AuditableT1_CheckSynchroAssignement_msg" />
+  <bpmn:message id="Message_1bbiwcb" name="AuditableT1_CheckSynchroAssignment_msg" />
+  <bpmn:message id="Message_1y2qzdm" name="AuditableT1_Integrate_msg" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="JIO_Upload">
-      <bpmndi:BPMNEdge id="Flow_047xkzd_di" bpmnElement="Flow_047xkzd">
-        <di:waypoint x="315" y="117" />
-        <di:waypoint x="370" y="117" />
+      <bpmndi:BPMNEdge id="Flow_0lp4a58_di" bpmnElement="Flow_0lp4a58">
+        <di:waypoint x="750" y="580" />
+        <di:waypoint x="750" y="620" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0gp6205_di" bpmnElement="Flow_0gp6205">
-        <di:waypoint x="470" y="300" />
-        <di:waypoint x="540" y="300" />
+      <bpmndi:BPMNEdge id="Flow_1txlbdv_di" bpmnElement="Flow_1txlbdv">
+        <di:waypoint x="750" y="470" />
+        <di:waypoint x="750" y="500" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1d5e87q_di" bpmnElement="Flow_1d5e87q">
-        <di:waypoint x="640" y="300" />
-        <di:waypoint x="740" y="300" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_07zvdgk_di" bpmnElement="Flow_07zvdgk">
-        <di:waypoint x="840" y="300" />
-        <di:waypoint x="900" y="300" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ub9yhb_di" bpmnElement="Flow_0ub9yhb">
-        <di:waypoint x="1000" y="300" />
-        <di:waypoint x="1078" y="300" />
-        <di:waypoint x="1078" y="430" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1qcm9kn_di" bpmnElement="Flow_1qcm9kn">
-        <di:waypoint x="1430" y="117" />
-        <di:waypoint x="1480" y="117" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_08409i0_di" bpmnElement="Flow_08409i0">
-        <di:waypoint x="1580" y="117" />
-        <di:waypoint x="1632" y="117" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0u10k7f_di" bpmnElement="Flow_0u10k7f">
-        <di:waypoint x="1430" y="117" />
-        <di:waypoint x="1451" y="117" />
-        <di:waypoint x="1451" y="210" />
-        <di:waypoint x="1472" y="210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jn7f0s_di" bpmnElement="Flow_0jn7f0s">
-        <di:waypoint x="420" y="157" />
-        <di:waypoint x="420" y="260" />
+      <bpmndi:BPMNEdge id="Flow_0oumamz_di" bpmnElement="Flow_0oumamz">
+        <di:waypoint x="350" y="227" />
+        <di:waypoint x="375" y="227" />
+        <di:waypoint x="375" y="395" />
+        <di:waypoint x="400" y="395" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0c8b7t2_di" bpmnElement="Flow_0c8b7t2">
-        <di:waypoint x="1380" y="430" />
-        <di:waypoint x="1380" y="157" />
+        <di:waypoint x="1260" y="620" />
+        <di:waypoint x="1260" y="267" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_047xkzd_di" bpmnElement="Flow_047xkzd">
+        <di:waypoint x="195" y="227" />
+        <di:waypoint x="250" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08409i0_di" bpmnElement="Flow_08409i0">
+        <di:waypoint x="1460" y="227" />
+        <di:waypoint x="1512" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qcm9kn_di" bpmnElement="Flow_1qcm9kn">
+        <di:waypoint x="1310" y="227" />
+        <di:waypoint x="1360" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0u10k7f_di" bpmnElement="Flow_0u10k7f">
+        <di:waypoint x="1310" y="227" />
+        <di:waypoint x="1331" y="227" />
+        <di:waypoint x="1331" y="320" />
+        <di:waypoint x="1352" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="279" y="99" width="36" height="36" />
+        <dc:Bounds x="159" y="209" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1kexpz8_di" bpmnElement="JioUploadIntegrationProcessor_process">
-        <dc:Bounds x="370" y="77" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_017a1s7_di" bpmnElement="AuditableT0_Integrate">
-        <dc:Bounds x="370" y="260" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0dnqb0z_di" bpmnElement="AuditableT0_Merge">
-        <dc:Bounds x="540" y="260" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1tfzaie_di" bpmnElement="AuditableT0_MergeDAO">
-        <dc:Bounds x="740" y="260" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1vtftq5_di" bpmnElement="AuditableT0_UpdatePostits">
-        <dc:Bounds x="900" y="260" width="100" height="80" />
+        <dc:Bounds x="250" y="187" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1fl0efu_di" bpmnElement="IntegrationController_SendToLegacy">
-        <dc:Bounds x="1480" y="77" width="100" height="80" />
+        <dc:Bounds x="1360" y="187" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0oru3qs_di" bpmnElement="Event_0oru3qs">
-        <dc:Bounds x="1632" y="99" width="36" height="36" />
+        <dc:Bounds x="1512" y="209" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1614" y="142" width="73" height="40" />
+          <dc:Bounds x="1494" y="252" width="73" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0gg41ab_di" bpmnElement="IntegrationController_SendToDasys">
-        <dc:Bounds x="1330" y="77" width="100" height="80" />
+        <dc:Bounds x="1210" y="187" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1yw5vcx_di" bpmnElement="Event_1yw5vcx">
-        <dc:Bounds x="1472" y="192" width="36" height="36" />
+        <dc:Bounds x="1352" y="302" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1455" y="235" width="70" height="40" />
+          <dc:Bounds x="1335" y="345" width="70" height="40" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1mr5sdc_di" bpmnElement="AuditableT1_Integrate_process" isExpanded="true">
-        <dc:Bounds x="520" y="430" width="1046" height="200" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1e2pej7_di" bpmnElement="Flow_1e2pej7">
-        <di:waypoint x="826" y="530" />
-        <di:waypoint x="866" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_09r2bf0_di" bpmnElement="Flow_09r2bf0">
-        <di:waypoint x="966" y="530" />
-        <di:waypoint x="996" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14ovo0n_di" bpmnElement="Flow_14ovo0n">
-        <di:waypoint x="578" y="530" />
-        <di:waypoint x="600" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1i1ed7e_di" bpmnElement="Flow_1i1ed7e">
-        <di:waypoint x="1356" y="530" />
-        <di:waypoint x="1386" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0gvcw68_di" bpmnElement="Flow_0gvcw68">
-        <di:waypoint x="1486" y="530" />
-        <di:waypoint x="1508" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0yov3le_di" bpmnElement="Flow_0yov3le">
-        <di:waypoint x="1096" y="530" />
-        <di:waypoint x="1126" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_02wa93g_di" bpmnElement="Flow_02wa93g">
-        <di:waypoint x="1226" y="530" />
-        <di:waypoint x="1256" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1dv3yu8_di" bpmnElement="Flow_1dv3yu8">
-        <di:waypoint x="700" y="530" />
-        <di:waypoint x="726" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_0dl7t3t_di" bpmnElement="Event_0dl7t3t">
-        <dc:Bounds x="542" y="512" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0q93s1l_di" bpmnElement="AuditableT1_Merge">
-        <dc:Bounds x="726" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_11co17e_di" bpmnElement="AuditableT1_MergeDAO">
-        <dc:Bounds x="866" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1q5fwka_di" bpmnElement="AuditableT1_UpdatePostits">
-        <dc:Bounds x="996" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1ht9b2y_di" bpmnElement="AuditableT1_UpdateReports">
-        <dc:Bounds x="1126" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_031r8jx_di" bpmnElement="AuditableT1_ReintegrationController">
-        <dc:Bounds x="1256" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1qhmlsp_di" bpmnElement="AuditableT1_CheckSynchroAssignement">
-        <dc:Bounds x="1386" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0hkhzcr_di" bpmnElement="Event_0hkhzcr">
-        <dc:Bounds x="1508" y="512" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_13lcfm0_di" bpmnElement="AuditableT1_Integrate">
-        <dc:Bounds x="600" y="490" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1a51wvs_di" bpmnElement="Activity_1g3ay8l" isExpanded="true">
-        <dc:Bounds x="160" y="470" width="303" height="120" />
+        <dc:Bounds x="500" y="80" width="303" height="120" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1sgqw32_di" bpmnElement="Flow_1sgqw32">
-        <di:waypoint x="228" y="530" />
-        <di:waypoint x="260" y="530" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ssiup9_di" bpmnElement="Flow_0ssiup9">
-        <di:waypoint x="360" y="530" />
-        <di:waypoint x="407" y="530" />
+        <di:waypoint x="700" y="140" />
+        <di:waypoint x="747" y="140" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_05z8gsb_di" bpmnElement="Event_13e377g">
-        <dc:Bounds x="407" y="512" width="36" height="36" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1sgqw32_di" bpmnElement="Flow_1sgqw32">
+        <di:waypoint x="568" y="140" />
+        <di:waypoint x="600" y="140" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_1lgpdaf_di" bpmnElement="Event_10l8guk">
-        <dc:Bounds x="192" y="512" width="36" height="36" />
+        <dc:Bounds x="532" y="122" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="197" y="555" width="26" height="14" />
+          <dc:Bounds x="537" y="165" width="26" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05z8gsb_di" bpmnElement="Event_13e377g">
+        <dc:Bounds x="747" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_08qnws3_di" bpmnElement="Activity_08qnws3">
-        <dc:Bounds x="260" y="490" width="100" height="80" />
+        <dc:Bounds x="600" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mr5sdc_di" bpmnElement="AuditableT1_Integrate_process" isExpanded="true">
+        <dc:Bounds x="400" y="620" width="1046" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1dv3yu8_di" bpmnElement="Flow_1dv3yu8">
+        <di:waypoint x="580" y="720" />
+        <di:waypoint x="606" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02wa93g_di" bpmnElement="Flow_02wa93g">
+        <di:waypoint x="1106" y="720" />
+        <di:waypoint x="1136" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yov3le_di" bpmnElement="Flow_0yov3le">
+        <di:waypoint x="976" y="720" />
+        <di:waypoint x="1006" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gvcw68_di" bpmnElement="Flow_0gvcw68">
+        <di:waypoint x="1366" y="720" />
+        <di:waypoint x="1388" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i1ed7e_di" bpmnElement="Flow_1i1ed7e">
+        <di:waypoint x="1236" y="720" />
+        <di:waypoint x="1266" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14ovo0n_di" bpmnElement="Flow_14ovo0n">
+        <di:waypoint x="458" y="720" />
+        <di:waypoint x="480" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09r2bf0_di" bpmnElement="Flow_09r2bf0">
+        <di:waypoint x="846" y="720" />
+        <di:waypoint x="876" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e2pej7_di" bpmnElement="Flow_1e2pej7">
+        <di:waypoint x="706" y="720" />
+        <di:waypoint x="746" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0dl7t3t_di" bpmnElement="Event_0dl7t3t">
+        <dc:Bounds x="422" y="702" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0q93s1l_di" bpmnElement="AuditableT1_Merge">
+        <dc:Bounds x="606" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11co17e_di" bpmnElement="AuditableT1_MergeDAO">
+        <dc:Bounds x="746" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1q5fwka_di" bpmnElement="AuditableT1_UpdatePostits">
+        <dc:Bounds x="876" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ht9b2y_di" bpmnElement="AuditableT1_UpdateReports">
+        <dc:Bounds x="1006" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_031r8jx_di" bpmnElement="AuditableT1_ReintegrationController">
+        <dc:Bounds x="1136" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1qhmlsp_di" bpmnElement="AuditableT1_CheckSynchroAssignement">
+        <dc:Bounds x="1266" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0hkhzcr_di" bpmnElement="Event_0hkhzcr">
+        <dc:Bounds x="1388" y="702" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_13lcfm0_di" bpmnElement="AuditableT1_Integrate">
+        <dc:Bounds x="480" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0f9c2x8_di" bpmnElement="Activity_0f9c2x8" isExpanded="true">
+        <dc:Bounds x="400" y="320" width="700" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1umelue_di" bpmnElement="Flow_1umelue">
+        <di:waypoint x="458" y="400" />
+        <di:waypoint x="480" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10j0d2k_di" bpmnElement="Flow_10j0d2k">
+        <di:waypoint x="990" y="400" />
+        <di:waypoint x="1032" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07zvdgk_di" bpmnElement="Flow_07zvdgk">
+        <di:waypoint x="860" y="400" />
+        <di:waypoint x="890" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1d5e87q_di" bpmnElement="Flow_1d5e87q">
+        <di:waypoint x="720" y="400" />
+        <di:waypoint x="760" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gp6205_di" bpmnElement="Flow_0gp6205">
+        <di:waypoint x="580" y="400" />
+        <di:waypoint x="620" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1fh60bz_di" bpmnElement="Event_1fh60bz">
+        <dc:Bounds x="422" y="382" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_017a1s7_di" bpmnElement="AuditableT0_Integrate">
+        <dc:Bounds x="480" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dnqb0z_di" bpmnElement="AuditableT0_Merge">
+        <dc:Bounds x="620" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1tfzaie_di" bpmnElement="AuditableT0_MergeDAO">
+        <dc:Bounds x="760" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1vtftq5_di" bpmnElement="AuditableT0_UpdatePostits">
+        <dc:Bounds x="890" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1b9yjr9_di" bpmnElement="Event_1b9yjr9">
+        <dc:Bounds x="1032" y="382" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ryfs20_di" bpmnElement="Activity_1ryfs20">
+        <dc:Bounds x="700" y="500" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

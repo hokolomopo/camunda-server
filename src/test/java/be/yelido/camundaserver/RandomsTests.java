@@ -5,7 +5,6 @@ import be.yelido.camunda.module.data.dto.Variable;
 import be.yelido.camunda.module.data.dto.VariableValueInfo;
 import be.yelido.camunda.module.data.request.CamundaType;
 import be.yelido.camunda.module.data.request.StartProcessInstanceParameters;
-import be.yelido.camunda.module.data.util.VariableUtil;
 import be.yelido.camunda.module.rest.CamundaRestTemplate;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
@@ -25,17 +24,17 @@ class RandomsTests {
 
     @Test
     void testMultiInstanceProcess() throws IOException {
-        CamundaRestTemplate restTemplate = new CamundaRestTemplate(url);
-
-        // Create Process Instance
-        ArrayList<String> c = new ArrayList<>();
-        c.add("BK1");
-        c.add("BK2");
-        c.add("BK3");
-        HashMap<String, Variable> variables = new HashMap<>();
-        variables.put("loopCollection", VariableUtil.createVariableFromCollection(c));
-        StartProcessInstanceParameters params = new StartProcessInstanceParameters( "BK", variables);
-        ProcessInstance p = restTemplate.startProcessInstanceByKey("testMultiInstanceSubrocess", params);
+//        CamundaRestTemplate restTemplate = new CamundaRestTemplate(url);
+//
+//        // Create Process Instance
+//        ArrayList<String> c = new ArrayList<>();
+//        c.add("BK1");
+//        c.add("BK2");
+//        c.add("BK3");
+//        HashMap<String, Variable> variables = new HashMap<>();
+//        variables.put("loopCollection", VariableUtil.createVariableFromCollection(c));
+//        StartProcessInstanceParameters params = new StartProcessInstanceParameters( "BK", variables);
+//        ProcessInstance p = restTemplate.startProcessInstanceByKey("testMultiInstanceSubrocess", params);
 
     }
 

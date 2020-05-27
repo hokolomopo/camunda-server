@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_07r1h4l" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="Dasys_Processor" name="Dasys Processor" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1tk64z9</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1tk64z9" sourceRef="StartEvent_1" targetRef="Dasys_Processor_Start" />
+    <bpmn:receiveTask id="Dasys_Processor_Start" name="Dasys Processor Start" messageRef="Message_1kopwhp">
+      <bpmn:incoming>Flow_1tk64z9</bpmn:incoming>
+      <bpmn:outgoing>Flow_08viqzx</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="Flow_08viqzx" sourceRef="Dasys_Processor_Start" targetRef="Gateway_1o6eosh" />
+    <bpmn:exclusiveGateway id="Gateway_1o6eosh" name="headers-action" camunda:asyncBefore="true">
+      <bpmn:incoming>Flow_08viqzx</bpmn:incoming>
+      <bpmn:outgoing>Flow_01eg0rz</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1rk7a9k</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0l9k4pm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1d7ie8w</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_01eg0rz" name="processor || null" sourceRef="Gateway_1o6eosh" targetRef="Dasys_Processor_Controller">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action == null || headers_action == "processor"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:task id="CBridgeController_fuseEmployee" name="CBridgeController fuseEmployee">
+      <bpmn:incoming>Flow_1rk7a9k</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rov7jd</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1rk7a9k" name="fusion-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_fuseEmployee">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "fusion-jawsdb"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:task id="CBridgeController_renumberEmployee" name="CBridgeController renumberEmployee">
+      <bpmn:incoming>Flow_0l9k4pm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mbubaf</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0l9k4pm" name="renumber-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_renumberEmployee">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "renumber-jawsdb"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:task id="CBridgeController_moveEncounter" name="CBridgeController moveEncounter">
+      <bpmn:incoming>Flow_1d7ie8w</bpmn:incoming>
+      <bpmn:outgoing>Flow_12sxz85</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1d7ie8w" name="moveencounter-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_moveEncounter">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "moveencounter-jawsdb"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_1ku955s">
+      <bpmn:incoming>Flow_1rov7jd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1rov7jd" sourceRef="CBridgeController_fuseEmployee" targetRef="Event_1ku955s" />
+    <bpmn:endEvent id="Event_0jtiq74">
+      <bpmn:incoming>Flow_0mbubaf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0mbubaf" sourceRef="CBridgeController_renumberEmployee" targetRef="Event_0jtiq74" />
+    <bpmn:endEvent id="Event_1gw0n8e">
+      <bpmn:incoming>Flow_12sxz85</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_12sxz85" sourceRef="CBridgeController_moveEncounter" targetRef="Event_1gw0n8e" />
+    <bpmn:endEvent id="Event_1n8wkvh">
+      <bpmn:incoming>Flow_1hjroip</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1hjroip" sourceRef="Dasys_Processor_Controller" targetRef="Event_1n8wkvh" />
+    <bpmn:receiveTask id="Dasys_Processor_Controller" name="Dasys Processor Controller">
+      <bpmn:incoming>Flow_01eg0rz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hjroip</bpmn:outgoing>
+    </bpmn:receiveTask>
+  </bpmn:process>
+  <bpmn:message id="Message_1kopwhp" name="Dasys_Processor_Start_msg" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Dasys_Processor">
+      <bpmndi:BPMNEdge id="Flow_1hjroip_di" bpmnElement="Flow_1hjroip">
+        <di:waypoint x="710" y="120" />
+        <di:waypoint x="772" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12sxz85_di" bpmnElement="Flow_12sxz85">
+        <di:waypoint x="710" y="530" />
+        <di:waypoint x="772" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mbubaf_di" bpmnElement="Flow_0mbubaf">
+        <di:waypoint x="710" y="420" />
+        <di:waypoint x="772" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rov7jd_di" bpmnElement="Flow_1rov7jd">
+        <di:waypoint x="710" y="307" />
+        <di:waypoint x="772" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1d7ie8w_di" bpmnElement="Flow_1d7ie8w">
+        <di:waypoint x="470" y="332" />
+        <di:waypoint x="470" y="530" />
+        <di:waypoint x="610" y="530" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="500" y="496" width="80" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l9k4pm_di" bpmnElement="Flow_0l9k4pm">
+        <di:waypoint x="470" y="332" />
+        <di:waypoint x="470" y="420" />
+        <di:waypoint x="610" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="497" y="403" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rk7a9k_di" bpmnElement="Flow_1rk7a9k">
+        <di:waypoint x="495" y="307" />
+        <di:waypoint x="610" y="307" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="519" y="289" width="68" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01eg0rz_di" bpmnElement="Flow_01eg0rz">
+        <di:waypoint x="470" y="282" />
+        <di:waypoint x="470" y="120" />
+        <di:waypoint x="610" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="501" y="103" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08viqzx_di" bpmnElement="Flow_08viqzx">
+        <di:waypoint x="370" y="307" />
+        <di:waypoint x="445" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1tk64z9_di" bpmnElement="Flow_1tk64z9">
+        <di:waypoint x="215" y="307" />
+        <di:waypoint x="270" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="289" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11jh90r_di" bpmnElement="Dasys_Processor_Start">
+        <dc:Bounds x="270" y="267" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1o6eosh_di" bpmnElement="Gateway_1o6eosh" isMarkerVisible="true">
+        <dc:Bounds x="445" y="282" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="433" y="263" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1efrbuv_di" bpmnElement="CBridgeController_fuseEmployee">
+        <dc:Bounds x="610" y="267" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mxxr1y_di" bpmnElement="CBridgeController_renumberEmployee">
+        <dc:Bounds x="610" y="380" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1vedr5f_di" bpmnElement="CBridgeController_moveEncounter">
+        <dc:Bounds x="610" y="490" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ku955s_di" bpmnElement="Event_1ku955s">
+        <dc:Bounds x="772" y="289" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0jtiq74_di" bpmnElement="Event_0jtiq74">
+        <dc:Bounds x="772" y="402" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1gw0n8e_di" bpmnElement="Event_1gw0n8e">
+        <dc:Bounds x="772" y="512" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1n8wkvh_di" bpmnElement="Event_1n8wkvh">
+        <dc:Bounds x="772" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pri3st_di" bpmnElement="Dasys_Processor_Controller">
+        <dc:Bounds x="610" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

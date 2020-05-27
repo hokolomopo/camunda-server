@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0jg0lvo" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="Process_Employee" name="Process_Employee" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1x2ohr3</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="Process_Employee_Star" name="Process Emlpoyee" messageRef="Message_0lpnxpu">
+      <bpmn:incoming>Flow_1x2ohr3</bpmn:incoming>
+      <bpmn:outgoing>Flow_01w7gmo</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="Flow_01w7gmo" sourceRef="Process_Employee_Star" targetRef="Dasys_Processor" />
+    <bpmn:callActivity id="Dasys_Processor" name="Dasys Processor" calledElement="Dasys_Processor">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{BK_DasysProcessor}" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_01w7gmo</bpmn:incoming>
+      <bpmn:outgoing>Flow_1u89dqh</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_1x2ohr3" sourceRef="StartEvent_1" targetRef="Process_Employee_Star" />
+    <bpmn:endEvent id="Event_1hhx0g0">
+      <bpmn:incoming>Flow_1u89dqh</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1u89dqh" sourceRef="Dasys_Processor" targetRef="Event_1hhx0g0" />
+  </bpmn:process>
+  <bpmn:message id="Message_0lpnxpu" name="Process_Employee_Start_msg" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_Employee">
+      <bpmndi:BPMNEdge id="Flow_01w7gmo_di" bpmnElement="Flow_01w7gmo">
+        <di:waypoint x="350" y="97" />
+        <di:waypoint x="400" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x2ohr3_di" bpmnElement="Flow_1x2ohr3">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="250" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1u89dqh_di" bpmnElement="Flow_1u89dqh">
+        <di:waypoint x="500" y="97" />
+        <di:waypoint x="552" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0w4r2kl_di" bpmnElement="Process_Employee_Star">
+        <dc:Bounds x="250" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wf6mkd_di" bpmnElement="Dasys_Processor">
+        <dc:Bounds x="400" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1hhx0g0_di" bpmnElement="Event_1hhx0g0">
+        <dc:Bounds x="552" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
