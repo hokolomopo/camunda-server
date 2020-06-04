@@ -71,6 +71,25 @@
     <bpmn:sequenceFlow id="Flow_08409i0" sourceRef="IntegrationController_SendToLegacy" targetRef="Event_0oru3qs" />
     <bpmn:sequenceFlow id="Flow_047xkzd" sourceRef="StartEvent_1" targetRef="JioUploadIntegrationProcessor_process" />
     <bpmn:subProcess id="AuditableT1_Integrate_process" name="Integrate Auditables T1">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="be.yelido.camundaserver.deleguates.InitLocalVariables" event="start">
+          <camunda:field name="var1">
+            <camunda:expression>uuid</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var2">
+            <camunda:expression>rrnr</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var3">
+            <camunda:expression>sisnumber</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var4">
+            <camunda:expression>name</camunda:expression>
+          </camunda:field>
+          <camunda:field name="var5">
+            <camunda:expression>wnnumber</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_0lp4a58</bpmn:incoming>
       <bpmn:outgoing>Flow_0c8b7t2</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true">
@@ -121,25 +140,6 @@
       <bpmn:sequenceFlow id="Flow_0yov3le" sourceRef="AuditableT1_UpdatePostits" targetRef="AuditableT1_UpdateReports" />
       <bpmn:sequenceFlow id="Flow_02wa93g" sourceRef="AuditableT1_UpdateReports" targetRef="AuditableT1_ReintegrationController" />
       <bpmn:receiveTask id="AuditableT1_Integrate" name="Begin MergeAuditableT1" camunda:asyncBefore="true" messageRef="Message_14ko9xi">
-        <bpmn:extensionElements>
-          <camunda:executionListener class="be.yelido.camundaserver.deleguates.SetScopeToLocal" event="end">
-            <camunda:field name="var1">
-              <camunda:string>NameT1</camunda:string>
-            </camunda:field>
-            <camunda:field name="var2">
-              <camunda:string>UuidT1</camunda:string>
-            </camunda:field>
-            <camunda:field name="var3">
-              <camunda:string>SisNumber</camunda:string>
-            </camunda:field>
-            <camunda:field name="var4">
-              <camunda:string>WnNumber</camunda:string>
-            </camunda:field>
-            <camunda:field name="var5">
-              <camunda:string>RrNr</camunda:string>
-            </camunda:field>
-          </camunda:executionListener>
-        </bpmn:extensionElements>
         <bpmn:incoming>Flow_14ovo0n</bpmn:incoming>
         <bpmn:outgoing>Flow_1dv3yu8</bpmn:outgoing>
       </bpmn:receiveTask>
@@ -294,7 +294,9 @@
         <dc:Bounds x="400" y="620" width="1046" height="200" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1dv3yu8_di" bpmnElement="Flow_1dv3yu8">
-        <di:waypoint x="580" y="720" />
+        <di:waypoint x="580" y="725" />
+        <di:waypoint x="593" y="725" />
+        <di:waypoint x="593" y="720" />
         <di:waypoint x="606" y="720" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02wa93g_di" bpmnElement="Flow_02wa93g">
@@ -315,7 +317,9 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_14ovo0n_di" bpmnElement="Flow_14ovo0n">
         <di:waypoint x="458" y="720" />
-        <di:waypoint x="480" y="720" />
+        <di:waypoint x="469" y="720" />
+        <di:waypoint x="469" y="725" />
+        <di:waypoint x="480" y="725" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_09r2bf0_di" bpmnElement="Flow_09r2bf0">
         <di:waypoint x="846" y="720" />
@@ -350,7 +354,7 @@
         <dc:Bounds x="1388" y="702" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_13lcfm0_di" bpmnElement="AuditableT1_Integrate">
-        <dc:Bounds x="480" y="680" width="100" height="80" />
+        <dc:Bounds x="480" y="685" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0f9c2x8_di" bpmnElement="Activity_0f9c2x8" isExpanded="true">
         <dc:Bounds x="400" y="320" width="700" height="150" />

@@ -8,6 +8,8 @@ public class InitLocalVariables implements JavaDelegate {
     private Expression var1;
     private Expression var2;
     private Expression var3;
+    private Expression var4;
+    private Expression var5;
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
@@ -24,6 +26,16 @@ public class InitLocalVariables implements JavaDelegate {
         }
 
         if(var3 != null) {
+            varName = (String) var3.getValue(execution);
+            execution.setVariableLocal(varName, "");
+        }
+
+        if(var4 != null) {
+            varName = (String) var3.getValue(execution);
+            execution.setVariableLocal(varName, "");
+        }
+
+        if(var5 != null) {
             varName = (String) var3.getValue(execution);
             execution.setVariableLocal(varName, "");
         }

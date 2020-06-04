@@ -26,18 +26,9 @@
     <bpmn:sequenceFlow id="Flow_162qphk" sourceRef="UploadServiceImpl_uploadAuditable" targetRef="SynchroController_integrateDataSource" />
     <bpmn:sequenceFlow id="Flow_09z6ve3" sourceRef="StartEvent_1" targetRef="UploadServiceImpl_uploadAuditable" />
     <bpmn:subProcess id="Activity_1yd4ch8" name="Processor Legacy" triggeredByEvent="true">
-      <bpmn:callActivity id="ProcessWorker" name="Orchestrator : ProcessWorker" calledElement="Process_Worker">
-        <bpmn:extensionElements>
-          <camunda:in businessKey="#{BK}" />
-        </bpmn:extensionElements>
-        <bpmn:incoming>Flow_0sc4yru</bpmn:incoming>
-        <bpmn:outgoing>Flow_14snqz5</bpmn:outgoing>
-        <bpmn:multiInstanceLoopCharacteristics camunda:collection="${ESBLegacy_Bks}" camunda:elementVariable="BK" />
-      </bpmn:callActivity>
       <bpmn:endEvent id="Event_0be4vhz">
-        <bpmn:incoming>Flow_14snqz5</bpmn:incoming>
+        <bpmn:incoming>Flow_0sc4yru</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:sequenceFlow id="Flow_14snqz5" sourceRef="ProcessWorker" targetRef="Event_0be4vhz" />
       <bpmn:startEvent id="Event_0jplamo" camunda:asyncBefore="true" isInterrupting="false">
         <bpmn:extensionElements>
           <camunda:executionListener class="be.yelido.camundaserver.deleguates.SetScopeToLocal" event="start">
@@ -53,7 +44,6 @@
       <bpmn:callActivity id="ESB_Notification_Legacy" name="ESB Notification Legacy" camunda:asyncBefore="true" camunda:asyncAfter="true" calledElement="ESB_Notification">
         <bpmn:extensionElements>
           <camunda:in businessKey="#{BK_Legacy}" />
-          <camunda:out source="restCallsBKs" target="ESBLegacy_Bks" />
         </bpmn:extensionElements>
         <bpmn:incoming>Flow_11o2ig9</bpmn:incoming>
         <bpmn:incoming>Flow_0u307me</bpmn:incoming>
@@ -63,7 +53,7 @@
         <bpmn:outgoing>Flow_0u307me</bpmn:outgoing>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_0cqggo7" errorRef="Error_0ighybi" camunda:errorMessageVariable="Error_Esb_Legacy" />
       </bpmn:boundaryEvent>
-      <bpmn:sequenceFlow id="Flow_0sc4yru" sourceRef="ESB_Notification_Legacy" targetRef="ProcessWorker">
+      <bpmn:sequenceFlow id="Flow_0sc4yru" sourceRef="ESB_Notification_Legacy" targetRef="Event_0be4vhz">
         <bpmn:extensionElements>
           <camunda:executionListener expression="${execution.removeVariable(&#34;BK_Legacy&#34;)}" event="take" />
         </bpmn:extensionElements>
@@ -76,20 +66,11 @@
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_1aqfk8g" sourceRef="Event_0d3zto6" targetRef="JIO_Upload" />
     <bpmn:subProcess id="Activity_19el9j7" name="Processor Dasys" triggeredByEvent="true">
-      <bpmn:callActivity id="ProcessEmployee" name="Orchestrator : ProcessEmployee" camunda:asyncBefore="true" calledElement="Process_Employee">
-        <bpmn:extensionElements>
-          <camunda:in businessKey="#{BK}" />
-        </bpmn:extensionElements>
-        <bpmn:incoming>Flow_02xkjjj</bpmn:incoming>
-        <bpmn:outgoing>Flow_0a0u98y</bpmn:outgoing>
-        <bpmn:multiInstanceLoopCharacteristics camunda:collection="${ESBDasys_BKs}" camunda:elementVariable="BK" />
-      </bpmn:callActivity>
       <bpmn:endEvent id="Event_114elp9">
-        <bpmn:incoming>Flow_0a0u98y</bpmn:incoming>
+        <bpmn:incoming>Flow_02xkjjj</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:callActivity id="ESB_Notification_DaSyS" name="ESB Notification DaSyS" camunda:asyncBefore="true" calledElement="ESB_Notification">
         <bpmn:extensionElements>
-          <camunda:out source="restCallsBKs" target="ESBDasys_BKs" />
           <camunda:in businessKey="#{BK_Dasys}" />
         </bpmn:extensionElements>
         <bpmn:incoming>Flow_0aa0sjt</bpmn:incoming>
@@ -97,7 +78,6 @@
         <bpmn:outgoing>Flow_02xkjjj</bpmn:outgoing>
       </bpmn:callActivity>
       <bpmn:sequenceFlow id="Flow_0aa0sjt" sourceRef="Event_1cf70s7" targetRef="ESB_Notification_DaSyS" />
-      <bpmn:sequenceFlow id="Flow_0a0u98y" sourceRef="ProcessEmployee" targetRef="Event_114elp9" />
       <bpmn:startEvent id="Event_1cf70s7" camunda:asyncBefore="true" isInterrupting="false">
         <bpmn:extensionElements>
           <camunda:executionListener class="be.yelido.camundaserver.deleguates.SetScopeToLocal" event="start">
@@ -114,22 +94,15 @@
         <bpmn:errorEventDefinition id="ErrorEventDefinition_05yyer3" errorRef="Error_0ighybi" camunda:errorMessageVariable="Error_Esb_Dasys" />
       </bpmn:boundaryEvent>
       <bpmn:sequenceFlow id="Flow_1x786mb" sourceRef="Event_08d2wpq" targetRef="ESB_Notification_DaSyS" />
-      <bpmn:sequenceFlow id="Flow_02xkjjj" sourceRef="ESB_Notification_DaSyS" targetRef="ProcessEmployee">
+      <bpmn:sequenceFlow id="Flow_02xkjjj" sourceRef="ESB_Notification_DaSyS" targetRef="Event_114elp9">
         <bpmn:extensionElements>
           <camunda:executionListener expression="${execution.removeVariable(&#34;BK_Dasys&#34;)}" event="take" />
         </bpmn:extensionElements>
       </bpmn:sequenceFlow>
     </bpmn:subProcess>
     <bpmn:subProcess id="Activity_0b904fq" name="Update prestation" triggeredByEvent="true">
-      <bpmn:callActivity id="UpdatePrestation" name="Orchestrator : UpdatePrestation" camunda:asyncBefore="true" calledElement="Orchestrator_Rest">
-        <bpmn:extensionElements>
-          <camunda:in businessKey="#{ESBUpdatePrestation_Bk}" />
-        </bpmn:extensionElements>
-        <bpmn:incoming>Flow_0agixfl</bpmn:incoming>
-        <bpmn:outgoing>Flow_1ky8t9n</bpmn:outgoing>
-      </bpmn:callActivity>
       <bpmn:endEvent id="Event_0tmpior">
-        <bpmn:incoming>Flow_1ky8t9n</bpmn:incoming>
+        <bpmn:incoming>Flow_0agixfl</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:startEvent id="Event_1a7en85" camunda:asyncBefore="true" isInterrupting="false">
         <bpmn:extensionElements>
@@ -145,7 +118,6 @@
       <bpmn:callActivity id="Activity_1w2vbgp" name="ESB Notification UpdatePrestation" camunda:asyncBefore="true" calledElement="ESB_Notification">
         <bpmn:extensionElements>
           <camunda:in businessKey="#{BK_UpdatePrestation}" />
-          <camunda:out source="restCallsBKs" target="ESBUpdatePrestation_Bk" />
         </bpmn:extensionElements>
         <bpmn:incoming>Flow_10htdj6</bpmn:incoming>
         <bpmn:incoming>Flow_13lw0d9</bpmn:incoming>
@@ -156,13 +128,12 @@
         <bpmn:errorEventDefinition id="ErrorEventDefinition_0at1pvf" errorRef="Error_0ighybi" camunda:errorMessageVariable="Error_Esb_Legacy" />
       </bpmn:boundaryEvent>
       <bpmn:sequenceFlow id="Flow_10htdj6" sourceRef="Event_07zdt8j" targetRef="Activity_1w2vbgp" />
-      <bpmn:sequenceFlow id="Flow_0agixfl" sourceRef="Activity_1w2vbgp" targetRef="UpdatePrestation">
+      <bpmn:sequenceFlow id="Flow_0agixfl" sourceRef="Activity_1w2vbgp" targetRef="Event_0tmpior">
         <bpmn:extensionElements>
           <camunda:executionListener expression="${execution.removeVariable(&#34;BK_UpdatePrestation&#34;)}" event="take" />
         </bpmn:extensionElements>
       </bpmn:sequenceFlow>
       <bpmn:sequenceFlow id="Flow_13lw0d9" sourceRef="Event_1a7en85" targetRef="Activity_1w2vbgp" />
-      <bpmn:sequenceFlow id="Flow_1ky8t9n" sourceRef="UpdatePrestation" targetRef="Event_0tmpior" />
     </bpmn:subProcess>
     <bpmn:endEvent id="Event_01uk8jg">
       <bpmn:incoming>Flow_0ew0tc8</bpmn:incoming>
@@ -220,7 +191,7 @@
         <dc:Bounds x="620" y="397" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1pb75d2_di" bpmnElement="Activity_1yd4ch8" isExpanded="true">
-        <dc:Bounds x="830" y="342" width="598" height="190" />
+        <dc:Bounds x="830" y="342" width="388" height="190" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0u307me_di" bpmnElement="Flow_0u307me">
         <di:waypoint x="1050" y="404" />
@@ -230,37 +201,30 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0sc4yru_di" bpmnElement="Flow_0sc4yru">
         <di:waypoint x="1050" y="462" />
-        <di:waypoint x="1140" y="462" />
+        <di:waypoint x="1132" y="462" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11o2ig9_di" bpmnElement="Flow_11o2ig9">
         <di:waypoint x="888" y="462" />
         <di:waypoint x="950" y="462" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14snqz5_di" bpmnElement="Flow_14snqz5">
-        <di:waypoint x="1240" y="462" />
-        <di:waypoint x="1342" y="462" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Activity_05x79pw_di" bpmnElement="ProcessWorker">
-        <dc:Bounds x="1140" y="422" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0be4vhz_di" bpmnElement="Event_0be4vhz">
-        <dc:Bounds x="1342" y="444" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_132elkb_di" bpmnElement="Event_0jplamo">
         <dc:Bounds x="852" y="444" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ag222u_di" bpmnElement="ESB_Notification_Legacy">
         <dc:Bounds x="950" y="422" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0be4vhz_di" bpmnElement="Event_0be4vhz">
+        <dc:Bounds x="1132" y="444" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0x45jb5_di" bpmnElement="Event_1m1zo33">
         <dc:Bounds x="1032" y="404" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_02kx4b8_di" bpmnElement="Activity_19el9j7" isExpanded="true">
-        <dc:Bounds x="820" y="570" width="598" height="200" />
+        <dc:Bounds x="820" y="570" width="388" height="200" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_02xkjjj_di" bpmnElement="Flow_02xkjjj">
         <di:waypoint x="1038" y="700" />
-        <di:waypoint x="1140" y="700" />
+        <di:waypoint x="1132" y="700" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x786mb_di" bpmnElement="Flow_1x786mb">
         <di:waypoint x="1038" y="642" />
@@ -268,43 +232,32 @@
         <di:waypoint x="970" y="620" />
         <di:waypoint x="970" y="660" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0a0u98y_di" bpmnElement="Flow_0a0u98y">
-        <di:waypoint x="1240" y="700" />
-        <di:waypoint x="1342" y="700" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0aa0sjt_di" bpmnElement="Flow_0aa0sjt">
         <di:waypoint x="876" y="700" />
         <di:waypoint x="938" y="700" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Activity_01l7n2n_di" bpmnElement="ProcessEmployee">
-        <dc:Bounds x="1140" y="660" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_114elp9_di" bpmnElement="Event_114elp9">
-        <dc:Bounds x="1342" y="682" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_153scrb_di" bpmnElement="ESB_Notification_DaSyS">
         <dc:Bounds x="938" y="660" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1osvewc_di" bpmnElement="Event_1cf70s7">
         <dc:Bounds x="840" y="682" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_114elp9_di" bpmnElement="Event_114elp9">
+        <dc:Bounds x="1132" y="682" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1oyh6e5_di" bpmnElement="Event_08d2wpq">
         <dc:Bounds x="1020" y="642" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0b904fq_di" bpmnElement="Activity_0b904fq" isExpanded="true">
-        <dc:Bounds x="830" y="80" width="598" height="229" />
+        <dc:Bounds x="830" y="80" width="388" height="229" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1ky8t9n_di" bpmnElement="Flow_1ky8t9n">
-        <di:waypoint x="1240" y="200" />
-        <di:waypoint x="1342" y="200" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_13lw0d9_di" bpmnElement="Flow_13lw0d9">
         <di:waypoint x="888" y="200" />
         <di:waypoint x="950" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0agixfl_di" bpmnElement="Flow_0agixfl">
         <di:waypoint x="1050" y="200" />
-        <di:waypoint x="1140" y="200" />
+        <di:waypoint x="1132" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10htdj6_di" bpmnElement="Flow_10htdj6">
         <di:waypoint x="1050" y="142" />
@@ -312,17 +265,14 @@
         <di:waypoint x="970" y="122" />
         <di:waypoint x="970" y="160" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Activity_1hp9u1p_di" bpmnElement="UpdatePrestation">
-        <dc:Bounds x="1140" y="160" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0tmpior_di" bpmnElement="Event_0tmpior">
-        <dc:Bounds x="1342" y="182" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1a7en85_di" bpmnElement="Event_1a7en85">
         <dc:Bounds x="852" y="182" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1w2vbgp_di" bpmnElement="Activity_1w2vbgp">
         <dc:Bounds x="950" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0tmpior_di" bpmnElement="Event_0tmpior">
+        <dc:Bounds x="1132" y="182" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_07zdt8j_di" bpmnElement="Event_07zdt8j">
         <dc:Bounds x="1032" y="142" width="36" height="36" />
