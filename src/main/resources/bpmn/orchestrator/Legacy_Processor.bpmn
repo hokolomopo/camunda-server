@@ -58,10 +58,10 @@
       <bpmn:incoming>Flow_1e3ljno</bpmn:incoming>
       <bpmn:outgoing>Flow_0xp0byg</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:endEvent id="End_Legacy_Processo">
+    <bpmn:endEvent id="End_Legacy_Processor">
       <bpmn:incoming>Flow_0xp0byg</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0xp0byg" sourceRef="Reintegration_Processor" targetRef="End_Legacy_Processo" />
+    <bpmn:sequenceFlow id="Flow_0xp0byg" sourceRef="Reintegration_Processor" targetRef="End_Legacy_Processor" />
     <bpmn:sequenceFlow id="Flow_16hfvja" sourceRef="Administrative_Processor" targetRef="Hazard_Processor" />
     <bpmn:sequenceFlow id="Flow_1ck8uie" sourceRef="Hazard_Processor" targetRef="Hepatitis_Processor" />
     <bpmn:sequenceFlow id="Flow_0wvarsj" sourceRef="Hepatitis_Processor" targetRef="Inability_Processor" />
@@ -177,7 +177,7 @@
       <bpmndi:BPMNShape id="Activity_1aaqfo0_di" bpmnElement="Reintegration_Processor">
         <dc:Bounds x="1200" y="297" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1bftc6f_di" bpmnElement="End_Legacy_Processo">
+      <bpmndi:BPMNShape id="Event_1bftc6f_di" bpmnElement="End_Legacy_Processor">
         <dc:Bounds x="1322" y="319" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
