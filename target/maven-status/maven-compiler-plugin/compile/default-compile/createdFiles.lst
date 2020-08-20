@@ -1,1 +1,6 @@
+be\yelido\camundaserver\deleguates\SendMsgToParent.class
 be\yelido\camundaserver\CamundaServerApplication.class
+be\yelido\camundaserver\deleguates\InvalidateLabRequest.class
+be\yelido\camundaserver\deleguates\SetScopeToLocal.class
+be\yelido\camundaserver\config\CamundaConfig.class
+be\yelido\camundaserver\deleguates\InitLocalVariables.class

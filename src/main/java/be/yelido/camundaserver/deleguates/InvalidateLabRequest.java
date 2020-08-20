@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.engine.runtime.EventSubscription;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,23 +16,28 @@ public class InvalidateLabRequest implements JavaDelegate {
     public void execute(DelegateExecution execution) throws Exception {
 
         try {
-            String oldLabRequestUuid = (String) execution.getVariable("oldLabRequestUUID");
+            String oldLabRequestUuid = (String) execution.getVariable("oldLabRequestUuid");
 
             log.info("Invalidate old lab request [{}]", oldLabRequestUuid);
 
             RuntimeService runtimeService = execution.getProcessEngine().getRuntimeService();
 
-            String signalName = "Cancel_" + oldLabRequestUuid + "_msg";
+            String messageName = "Cancel_" + oldLabRequestUuid + "_msg";
 
             Map<String, Object> vars = new HashMap<>();
             vars.put("labRequestStatus", "INVALIDATED");
 
-            runtimeService
-                    .createSignalEvent(signalName)
-                    .setVariables(vars)
-                    .send();
-        }catch (Exception ignored){
+            EventSubscription subscription = runtimeService.createEventSubscriptionQuery().eventName(messageName).singleResult();
 
+            if(subscription != null)
+                runtimeService.messageEventReceived(subscription.getEventName(), subscription.getExecutionId());
+
+//            runtimeService
+//                    .createMessageCorrelation(messageName)
+//                    .setVariables(vars)
+//                    .correlate();
+        }catch (Exception ignored){
+            System.err.println("Exception");
         }
 
         return;

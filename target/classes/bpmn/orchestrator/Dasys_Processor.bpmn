@@ -2,11 +2,9 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_07r1h4l" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:process id="Dasys_Processor" name="Dasys Processor" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_1tk64z9</bpmn:outgoing>
+      <bpmn:outgoing>Flow_195e7u6</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_1tk64z9" sourceRef="StartEvent_1" targetRef="Dasys_Processor_Start" />
     <bpmn:receiveTask id="Dasys_Processor_Start" name="Dasys Processor Start" messageRef="Message_1kopwhp">
-      <bpmn:incoming>Flow_1tk64z9</bpmn:incoming>
       <bpmn:outgoing>Flow_08viqzx</bpmn:outgoing>
     </bpmn:receiveTask>
     <bpmn:sequenceFlow id="Flow_08viqzx" sourceRef="Dasys_Processor_Start" targetRef="Gateway_1o6eosh" />
@@ -20,24 +18,12 @@
     <bpmn:sequenceFlow id="Flow_01eg0rz" name="processor || null" sourceRef="Gateway_1o6eosh" targetRef="Dasys_Processor_Controller">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action == null || headers_action == "processor"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:task id="CBridgeController_fuseEmployee" name="CBridgeController fuseEmployee">
-      <bpmn:incoming>Flow_1rk7a9k</bpmn:incoming>
-      <bpmn:outgoing>Flow_1rov7jd</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_1rk7a9k" name="fusion-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_fuseEmployee">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "fusion-jawsdb"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:task id="CBridgeController_renumberEmployee" name="CBridgeController renumberEmployee">
-      <bpmn:incoming>Flow_0l9k4pm</bpmn:incoming>
-      <bpmn:outgoing>Flow_0mbubaf</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_0l9k4pm" name="renumber-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_renumberEmployee">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "renumber-jawsdb"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:task id="CBridgeController_moveEncounter" name="CBridgeController moveEncounter">
-      <bpmn:incoming>Flow_1d7ie8w</bpmn:incoming>
-      <bpmn:outgoing>Flow_12sxz85</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_1d7ie8w" name="moveencounter-jawsdb" sourceRef="Gateway_1o6eosh" targetRef="CBridgeController_moveEncounter">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headers_action  == "moveencounter-jawsdb"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -61,6 +47,22 @@
       <bpmn:incoming>Flow_01eg0rz</bpmn:incoming>
       <bpmn:outgoing>Flow_1hjroip</bpmn:outgoing>
     </bpmn:receiveTask>
+    <bpmn:receiveTask id="CBridgeController_fuseEmployee" name="fuseEmployee">
+      <bpmn:incoming>Flow_1rk7a9k</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rov7jd</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="CBridgeController_renumberEmployee" name="renumberEmployee">
+      <bpmn:incoming>Flow_0l9k4pm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mbubaf</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="CBridgeController_moveEncounter" name="moveEncounter">
+      <bpmn:incoming>Flow_1d7ie8w</bpmn:incoming>
+      <bpmn:outgoing>Flow_12sxz85</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:endEvent id="Event_1u99b3c">
+      <bpmn:incoming>Flow_195e7u6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_195e7u6" sourceRef="StartEvent_1" targetRef="Event_1u99b3c" />
   </bpmn:process>
   <bpmn:message id="Message_1kopwhp" name="Dasys_Processor_Start_msg" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -116,9 +118,9 @@
         <di:waypoint x="370" y="307" />
         <di:waypoint x="445" y="307" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1tk64z9_di" bpmnElement="Flow_1tk64z9">
-        <di:waypoint x="215" y="307" />
-        <di:waypoint x="270" y="307" />
+      <bpmndi:BPMNEdge id="Flow_195e7u6_di" bpmnElement="Flow_195e7u6">
+        <di:waypoint x="197" y="289" />
+        <di:waypoint x="197" y="258" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="289" width="36" height="36" />
@@ -131,15 +133,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="433" y="263" width="73" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1efrbuv_di" bpmnElement="CBridgeController_fuseEmployee">
-        <dc:Bounds x="610" y="267" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1mxxr1y_di" bpmnElement="CBridgeController_renumberEmployee">
-        <dc:Bounds x="610" y="380" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1vedr5f_di" bpmnElement="CBridgeController_moveEncounter">
-        <dc:Bounds x="610" y="490" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1ku955s_di" bpmnElement="Event_1ku955s">
         <dc:Bounds x="772" y="289" width="36" height="36" />
@@ -155,6 +148,18 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1pri3st_di" bpmnElement="Dasys_Processor_Controller">
         <dc:Bounds x="610" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_150f61b_di" bpmnElement="CBridgeController_fuseEmployee">
+        <dc:Bounds x="610" y="267" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_114wacz_di" bpmnElement="CBridgeController_renumberEmployee">
+        <dc:Bounds x="610" y="380" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tkh77v_di" bpmnElement="CBridgeController_moveEncounter">
+        <dc:Bounds x="610" y="490" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1u99b3c_di" bpmnElement="Event_1u99b3c">
+        <dc:Bounds x="179" y="222" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

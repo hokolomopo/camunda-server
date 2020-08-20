@@ -1,44 +1,21 @@
 package be.yelido.camundaserver.deleguates;
 
+import be.yelido.camundaserver.util.SimpleListStringParser;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public class InitLocalVariables implements JavaDelegate {
-    private Expression var1;
-    private Expression var2;
-    private Expression var3;
-    private Expression var4;
-    private Expression var5;
+    private Expression vars;
+    private SimpleListStringParser parser = new SimpleListStringParser();
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        String varName;
 
-        if(var1 != null) {
-            varName = (String) var1.getValue(execution);
+        String listString = (String)vars.getValue(execution);
+
+        for(String varName : parser.parse(listString)){
             execution.setVariableLocal(varName, "");
         }
-
-        if(var2 != null) {
-            varName = (String) var2.getValue(execution);
-            execution.setVariableLocal(varName, "");
-        }
-
-        if(var3 != null) {
-            varName = (String) var3.getValue(execution);
-            execution.setVariableLocal(varName, "");
-        }
-
-        if(var4 != null) {
-            varName = (String) var3.getValue(execution);
-            execution.setVariableLocal(varName, "");
-        }
-
-        if(var5 != null) {
-            varName = (String) var3.getValue(execution);
-            execution.setVariableLocal(varName, "");
-        }
-
     }
 }

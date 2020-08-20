@@ -6,10 +6,10 @@
         <camunda:property />
       </camunda:properties>
     </bpmn:extensionElements>
-    <bpmn:startEvent id="StartEvent_1">
+    <bpmn:startEvent id="Start_ESB_Notification">
       <bpmn:outgoing>Flow_0men4bn</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_0men4bn" sourceRef="StartEvent_1" targetRef="ESBNotificationProcessor_process" />
+    <bpmn:sequenceFlow id="Flow_0men4bn" sourceRef="Start_ESB_Notification" targetRef="ESBNotificationProcessor_process" />
     <bpmn:receiveTask id="ESBNotificationProcessor_process" name="ESBNotificationProcessor" messageRef="Message_14folzd">
       <bpmn:incoming>Flow_0men4bn</bpmn:incoming>
       <bpmn:outgoing>Flow_0bkauy2</bpmn:outgoing>
@@ -42,10 +42,10 @@
       <bpmn:outgoing>Flow_1kkwdha</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1sxnht0" sourceRef="Gateway_1e7ruqq" targetRef="Gateway_10knb3r" />
-    <bpmn:sequenceFlow id="Flow_1gl5kf8" name="transfer-encouter-jawsdb" sourceRef="Gateway_10knb3r" targetRef="ReplicateWorker">
+    <bpmn:sequenceFlow id="Flow_1gl5kf8" name="transfer-encouter-jawsdb" sourceRef="Gateway_10knb3r" targetRef="Transfer_Encounter">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headerDestination == "transfer-encouter-jawsdb"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_04xrph0">
+    <bpmn:endEvent id="End_ProcessWorker">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="Javascript">execution.setVariable("destination", "processWorker");</camunda:script>
@@ -53,7 +53,7 @@
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0mr0q8d</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:endEvent id="Event_03uarki">
+    <bpmn:endEvent id="End_ProcessEmployee">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="Javascript">execution.setVariable("destination", "processEmployee");</camunda:script>
@@ -65,19 +65,19 @@
     <bpmn:sequenceFlow id="Flow_1wrh5g8" name="processor-prestation-update" sourceRef="Gateway_10knb3r" targetRef="UpdatePrestation">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headerDestination == "processor-prestation-update"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_1jepszc">
+    <bpmn:endEvent id="End_Transfer_Encounter">
       <bpmn:incoming>Flow_15abdzc</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_15abdzc" sourceRef="ReplicateWorker" targetRef="Event_1jepszc" />
-    <bpmn:endEvent id="Event_17w77qt">
+    <bpmn:sequenceFlow id="Flow_15abdzc" sourceRef="Transfer_Encounter" targetRef="End_Transfer_Encounter" />
+    <bpmn:endEvent id="End_UpdatePrestation">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="Javascript">execution.setVariable("destination", "updatePrestation");</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_02ijnb9</bpmn:incoming>
+      <bpmn:incoming>Flow_1q77cv7</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1q77cv7" sourceRef="UpdatePrestation" targetRef="Activity_0gs5g2k" />
+    <bpmn:sequenceFlow id="Flow_1q77cv7" sourceRef="UpdatePrestation" targetRef="End_UpdatePrestation" />
     <bpmn:sequenceFlow id="Flow_14tsrl3" sourceRef="ProcessWorker" targetRef="Activity_1o1pna7" />
     <bpmn:receiveTask id="ProcessWorker" name="ProcessWorker" messageRef="Message_1kq2e59">
       <bpmn:incoming>Flow_1hapdxs</bpmn:incoming>
@@ -91,7 +91,7 @@
       <bpmn:incoming>Flow_1wrh5g8</bpmn:incoming>
       <bpmn:outgoing>Flow_1q77cv7</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:receiveTask id="ReplicateWorker" name="ReplicateWorker" messageRef="Message_1kq2e59">
+    <bpmn:receiveTask id="Transfer_Encounter" name="Transfer Encounter" messageRef="Message_1kq2e59">
       <bpmn:incoming>Flow_1gl5kf8</bpmn:incoming>
       <bpmn:outgoing>Flow_15abdzc</bpmn:outgoing>
     </bpmn:receiveTask>
@@ -110,32 +110,32 @@
     <bpmn:sequenceFlow id="Flow_1kkwdha" name="processor-legacy-replay" sourceRef="Gateway_10knb3r" targetRef="Activity_18ks1ip">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${headerDestination == "processor-legacy-replay"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_0zxn1ro">
+    <bpmn:endEvent id="End_Process_Worker">
       <bpmn:extensionElements>
         <camunda:executionListener expression="{execution.setVariable(“destination”, “processWorker”)}" event="start" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0gm13l6</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0gm13l6" sourceRef="Activity_18ks1ip" targetRef="Event_0zxn1ro" />
-    <bpmn:endEvent id="Event_1165yvx">
+    <bpmn:sequenceFlow id="Flow_0gm13l6" sourceRef="Activity_18ks1ip" targetRef="End_Process_Worker" />
+    <bpmn:endEvent id="End_Process_Emlpoyee">
       <bpmn:extensionElements>
         <camunda:executionListener expression="{execution.setVariable(“destination”, “processEmployee”)}" event="start" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1oz0jy2</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1oz0jy2" sourceRef="PorcessEmployee" targetRef="Event_1165yvx" />
-    <bpmn:endEvent id="Event_1desjwc">
+    <bpmn:sequenceFlow id="Flow_1oz0jy2" sourceRef="PorcessEmployee" targetRef="End_Process_Emlpoyee" />
+    <bpmn:endEvent id="End_Replicate_Worker">
       <bpmn:incoming>Flow_0fq1cqt</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0fq1cqt" sourceRef="Activity_1xik8gd" targetRef="Event_1desjwc" />
-    <bpmn:endEvent id="Event_1640vnk">
+    <bpmn:sequenceFlow id="Flow_0fq1cqt" sourceRef="Activity_1xik8gd" targetRef="End_Replicate_Worker" />
+    <bpmn:endEvent id="End_Fuse_Emlpoyee">
       <bpmn:incoming>Flow_0s5ewn5</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0s5ewn5" sourceRef="Activity_1tul1g4" targetRef="Event_1640vnk" />
-    <bpmn:endEvent id="Event_1o6f27x">
+    <bpmn:sequenceFlow id="Flow_0s5ewn5" sourceRef="Activity_1tul1g4" targetRef="End_Fuse_Emlpoyee" />
+    <bpmn:endEvent id="End_Renumber_Employee">
       <bpmn:incoming>Flow_17j60q0</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_17j60q0" sourceRef="RenumberEmployee" targetRef="Event_1o6f27x" />
+    <bpmn:sequenceFlow id="Flow_17j60q0" sourceRef="RenumberEmployee" targetRef="End_Renumber_Employee" />
     <bpmn:receiveTask id="RenumberEmployee" name="RenumberEmployee" messageRef="Message_1kq2e59">
       <bpmn:incoming>Flow_0dqlr18</bpmn:incoming>
       <bpmn:outgoing>Flow_17j60q0</bpmn:outgoing>
@@ -164,12 +164,12 @@
         <bpmn:outgoing>Flow_1cbgery</bpmn:outgoing>
         <bpmn:messageEventDefinition id="MessageEventDefinition_10houl9" messageRef="Message_0fobnhg" />
       </bpmn:startEvent>
-      <bpmn:endEvent id="Event_0u908d7">
+      <bpmn:endEvent id="Send_Camunda_Error">
         <bpmn:incoming>Flow_1g7fw3f</bpmn:incoming>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_1ajd6px" errorRef="Error_18tykap" />
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="Flow_1cbgery" sourceRef="Event_181r8q8" targetRef="Activity_0dacuu8" />
-      <bpmn:sequenceFlow id="Flow_1g7fw3f" sourceRef="Activity_0dacuu8" targetRef="Event_0u908d7" />
+      <bpmn:sequenceFlow id="Flow_1g7fw3f" sourceRef="Activity_0dacuu8" targetRef="Send_Camunda_Error" />
       <bpmn:receiveTask id="Activity_0dacuu8" name="Incident" camunda:asyncBefore="true" messageRef="Message_07qy9zn">
         <bpmn:incoming>Flow_1cbgery</bpmn:incoming>
         <bpmn:outgoing>Flow_1g7fw3f</bpmn:outgoing>
@@ -183,7 +183,7 @@
       <bpmn:outgoing>Flow_0l68cyp</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${RestCalls_BKs}" camunda:elementVariable="BK" />
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_0l68cyp" sourceRef="Activity_0rvk3c0" targetRef="Event_03uarki" />
+    <bpmn:sequenceFlow id="Flow_0l68cyp" sourceRef="Activity_0rvk3c0" targetRef="End_ProcessEmployee" />
     <bpmn:callActivity id="Activity_1o1pna7" name="Orchestrator : ProcessWorker" calledElement="Process_Worker">
       <bpmn:extensionElements>
         <camunda:in businessKey="#{BK}" />
@@ -192,15 +192,7 @@
       <bpmn:outgoing>Flow_0mr0q8d</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${RestCalls_BKs}" camunda:elementVariable="BK" />
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_0mr0q8d" sourceRef="Activity_1o1pna7" targetRef="Event_04xrph0" />
-    <bpmn:callActivity id="Activity_0gs5g2k" name="Orchestrator : UpdatePrestation" camunda:asyncBefore="true" calledElement="Update_Prestation">
-      <bpmn:extensionElements>
-        <camunda:in businessKey="#{RestCalls_BKs}" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1q77cv7</bpmn:incoming>
-      <bpmn:outgoing>Flow_02ijnb9</bpmn:outgoing>
-    </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_02ijnb9" sourceRef="Activity_0gs5g2k" targetRef="Event_17w77qt" />
+    <bpmn:sequenceFlow id="Flow_0mr0q8d" sourceRef="Activity_1o1pna7" targetRef="End_ProcessWorker" />
   </bpmn:process>
   <bpmn:message id="Message_14folzd" name="ESBNotificationProcessor_process_msg" />
   <bpmn:message id="Message_1kq2e59" name="ESBNotificationProcessor_end_msg" />
@@ -209,10 +201,6 @@
   <bpmn:error id="Error_18tykap" name="Execution_Error" errorCode="Execution_Error" camunda:errorMessage="${error_message}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ESB_Notification">
-      <bpmndi:BPMNEdge id="Flow_02ijnb9_di" bpmnElement="Flow_02ijnb9">
-        <di:waypoint x="1120" y="680" />
-        <di:waypoint x="1162" y="680" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0mr0q8d_di" bpmnElement="Flow_0mr0q8d">
         <di:waypoint x="980" y="820" />
         <di:waypoint x="1022" y="820" />
@@ -295,7 +283,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1q77cv7_di" bpmnElement="Flow_1q77cv7">
         <di:waypoint x="970" y="680" />
-        <di:waypoint x="1020" y="680" />
+        <di:waypoint x="1042" y="680" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_15abdzc_di" bpmnElement="Flow_15abdzc">
         <di:waypoint x="970" y="580" />
@@ -350,7 +338,7 @@
         <di:waypoint x="188" y="617" />
         <di:waypoint x="230" y="617" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="Start_ESB_Notification">
         <dc:Bounds x="152" y="599" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0sjsg0g_di" bpmnElement="ESBNotificationProcessor_process">
@@ -371,17 +359,14 @@
       <bpmndi:BPMNShape id="Gateway_10knb3r_di" bpmnElement="Gateway_10knb3r" isMarkerVisible="true">
         <dc:Bounds x="715" y="555" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_04xrph0_di" bpmnElement="Event_04xrph0">
+      <bpmndi:BPMNShape id="Event_04xrph0_di" bpmnElement="End_ProcessWorker">
         <dc:Bounds x="1022" y="802" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_03uarki_di" bpmnElement="Event_03uarki">
+      <bpmndi:BPMNShape id="Event_03uarki_di" bpmnElement="End_ProcessEmployee">
         <dc:Bounds x="1022" y="992" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1jepszc_di" bpmnElement="Event_1jepszc">
+      <bpmndi:BPMNShape id="Event_1jepszc_di" bpmnElement="End_Transfer_Encounter">
         <dc:Bounds x="1042" y="562" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_17w77qt_di" bpmnElement="Event_17w77qt">
-        <dc:Bounds x="1162" y="662" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_17ucwg0_di" bpmnElement="ProcessWorker">
         <dc:Bounds x="730" y="780" width="100" height="80" />
@@ -392,22 +377,22 @@
       <bpmndi:BPMNShape id="Activity_1sfs45g_di" bpmnElement="UpdatePrestation">
         <dc:Bounds x="870" y="640" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ipgqu0_di" bpmnElement="ReplicateWorker">
+      <bpmndi:BPMNShape id="Activity_0ipgqu0_di" bpmnElement="Transfer_Encounter">
         <dc:Bounds x="870" y="540" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0zxn1ro_di" bpmnElement="Event_0zxn1ro">
+      <bpmndi:BPMNShape id="Event_0zxn1ro_di" bpmnElement="End_Process_Worker">
         <dc:Bounds x="1042" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1165yvx_di" bpmnElement="Event_1165yvx">
+      <bpmndi:BPMNShape id="Event_1165yvx_di" bpmnElement="End_Process_Emlpoyee">
         <dc:Bounds x="1042" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1desjwc_di" bpmnElement="Event_1desjwc">
+      <bpmndi:BPMNShape id="Event_1desjwc_di" bpmnElement="End_Replicate_Worker">
         <dc:Bounds x="1042" y="282" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1640vnk_di" bpmnElement="Event_1640vnk">
+      <bpmndi:BPMNShape id="Event_1640vnk_di" bpmnElement="End_Fuse_Emlpoyee">
         <dc:Bounds x="1042" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1o6f27x_di" bpmnElement="Event_1o6f27x">
+      <bpmndi:BPMNShape id="Event_1o6f27x_di" bpmnElement="End_Renumber_Employee">
         <dc:Bounds x="1042" y="462" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_19sutdb_di" bpmnElement="RenumberEmployee">
@@ -424,6 +409,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_07uziw4_di" bpmnElement="Activity_18ks1ip">
         <dc:Bounds x="870" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_17w77qt_di" bpmnElement="End_UpdatePrestation">
+        <dc:Bounds x="1042" y="662" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0r80iu6_di" bpmnElement="Activity_0r80iu6" isExpanded="true">
         <dc:Bounds x="220" y="260" width="323" height="120" />
@@ -442,7 +430,7 @@
           <dc:Bounds x="257" y="345" width="26" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0u908d7_di" bpmnElement="Event_0u908d7">
+      <bpmndi:BPMNShape id="Event_0u908d7_di" bpmnElement="Send_Camunda_Error">
         <dc:Bounds x="487" y="302" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1y0cdmr_di" bpmnElement="Activity_0dacuu8">
@@ -453,9 +441,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1o1pna7_di" bpmnElement="Activity_1o1pna7">
         <dc:Bounds x="880" y="780" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0gs5g2k_di" bpmnElement="Activity_0gs5g2k">
-        <dc:Bounds x="1020" y="640" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

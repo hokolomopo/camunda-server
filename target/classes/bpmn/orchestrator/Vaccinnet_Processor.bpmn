@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_070ljci" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:process id="Vaccinnet_Processor" name="Vaccinnet Processor" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1">
+    <bpmn:startEvent id="Start_Process_Vaccin">
       <bpmn:outgoing>Flow_039i9i9</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_039i9i9" sourceRef="StartEvent_1" targetRef="Vaccinnet_Controller" />
+    <bpmn:sequenceFlow id="Flow_039i9i9" sourceRef="Start_Process_Vaccin" targetRef="Vaccinnet_Controller" />
     <bpmn:receiveTask id="Vaccinnet_Controller" name="Vaccinnet Controller" messageRef="Message_0jlt59o">
       <bpmn:incoming>Flow_039i9i9</bpmn:incoming>
       <bpmn:outgoing>Flow_05txxr5</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:sequenceFlow id="Flow_05txxr5" sourceRef="Vaccinnet_Controller" targetRef="Event_1pmbva4" />
-    <bpmn:endEvent id="Event_1pmbva4">
+    <bpmn:sequenceFlow id="Flow_05txxr5" sourceRef="Vaccinnet_Controller" targetRef="End_Process_Vaccin" />
+    <bpmn:endEvent id="End_Process_Vaccin">
       <bpmn:incoming>Flow_05txxr5</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:subProcess id="Activity_0qpyps0" name="" triggeredByEvent="true">
@@ -18,7 +18,7 @@
         <bpmn:outgoing>Flow_146uekj</bpmn:outgoing>
         <bpmn:messageEventDefinition id="MessageEventDefinition_0ptfaji" messageRef="Message_1nc3ujo" />
       </bpmn:startEvent>
-      <bpmn:endEvent id="Event_0ujizy1">
+      <bpmn:endEvent id="Send_Camunda_Error">
         <bpmn:incoming>Flow_1nwy3vf</bpmn:incoming>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_1mpevuf" errorRef="Error_0sbhb7e" />
       </bpmn:endEvent>
@@ -27,7 +27,7 @@
         <bpmn:outgoing>Flow_1nwy3vf</bpmn:outgoing>
       </bpmn:receiveTask>
       <bpmn:sequenceFlow id="Flow_146uekj" sourceRef="Event_1wxumai" targetRef="Activity_1hunpvx" />
-      <bpmn:sequenceFlow id="Flow_1nwy3vf" sourceRef="Activity_1hunpvx" targetRef="Event_0ujizy1" />
+      <bpmn:sequenceFlow id="Flow_1nwy3vf" sourceRef="Activity_1hunpvx" targetRef="Send_Camunda_Error" />
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_0jlt59o" name="Vaccinnet_Controller_msg" />
@@ -44,13 +44,13 @@
         <di:waypoint x="228" y="327" />
         <di:waypoint x="280" y="327" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="Start_Process_Vaccin">
         <dc:Bounds x="192" y="309" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0bort44_di" bpmnElement="Vaccinnet_Controller">
         <dc:Bounds x="280" y="287" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1pmbva4_di" bpmnElement="Event_1pmbva4">
+      <bpmndi:BPMNShape id="Event_1pmbva4_di" bpmnElement="End_Process_Vaccin">
         <dc:Bounds x="445" y="309" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0qpyps0_di" bpmnElement="Activity_0qpyps0" isExpanded="true">
@@ -70,7 +70,7 @@
           <dc:Bounds x="215" y="205" width="26" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0ujizy1_di" bpmnElement="Event_0ujizy1">
+      <bpmndi:BPMNShape id="Event_0ujizy1_di" bpmnElement="Send_Camunda_Error">
         <dc:Bounds x="425" y="162" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1hunpvx_di" bpmnElement="Activity_1hunpvx">

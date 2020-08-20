@@ -1,12 +1,8 @@
 package be.yelido.camundaserver;
 
-import be.yelido.camunda.module.data.dto.Execution;
 import be.yelido.camunda.module.data.dto.ProcessInstance;
 import be.yelido.camunda.module.data.dto.Variable;
-import be.yelido.camunda.module.data.dto.VariableValueInfo;
-import be.yelido.camunda.module.data.ids.AuditableT0Id;
-import be.yelido.camunda.module.data.ids.AuditableT1Id;
-import be.yelido.camunda.module.data.ids.ToProcessLegacyDTOId;
+import be.yelido.camunda.module.data.ids.*;
 import be.yelido.camunda.module.data.request.*;
 import be.yelido.camunda.module.rest.CamundaRestTemplate;
 import be.yelido.camunda.module.util.CamundaMonitor;
@@ -14,16 +10,14 @@ import be.yelido.camunda.module.util.CamundaToken;
 import be.yelido.camunda.module.util.VariableUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import jdk.nashorn.internal.parser.Token;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Ignore
 public class BPMNProcessTest {
     public static final String url = "http://localhost:8083/rest";
 
@@ -107,7 +101,7 @@ public class BPMNProcessTest {
         ---------------------------------------*/
         CamundaToken tokenMergeT0 = CamundaToken.randomBKToken(token);
         HashMap<String, Variable> variableMap = VariableUtil.mapFromSingleVariable("mergeAuditableT0_BK", new Variable(tokenMergeT0.getCurrentProcessBK()));
-        variableMap.putAll(auditableT0Id.toVariableMap(objectMapper));
+        variableMap.putAll(auditableT0Id.toVariableMap(objectMapper.convertValue(auditableT0Id, Map.class)));
         messageCorrelationParameters = new MessageCorrelationParameters("AuditableT0_Merge_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
 
@@ -135,9 +129,14 @@ public class BPMNProcessTest {
             Thread.sleep(300);
             CamundaToken mergeT1Token = CamundaToken.randomBKToken(token);
             variableMap = VariableUtil.mapFromSingleVariable("mergeAuditableT1_BK", new Variable(mergeT1Token.getCurrentProcessBK()));
-            variableMap.putAll(auditableT1Ids.get(i).toVariableMap(objectMapper));
+            variableMap.putAll(auditableT1Ids.get(i).toVariableMap(objectMapper.convertValue(auditableT1Ids.get(i), Map.class)));
             messageCorrelationParameters = new MessageCorrelationParameters("AuditableT1_Merge_msg", variableMap);
             camundaMonitor.correlateMessage(token, messageCorrelationParameters);
+
+            //TODO delete this
+//            Thread.sleep(300);
+//            if(i>0)
+//                raiseError(token, camundaMonitor, false);
 
             Thread.sleep(300);
             runMergeAuditableSubProcess(mergeT1Token, camundaMonitor, 1);
@@ -212,11 +211,13 @@ public class BPMNProcessTest {
             ProcessInstanceQuery restInstanceQuery = ProcessInstanceQuery.createQuery()
                     .businessKey(t.getCurrentProcessBK())
                     .build();
-            ProcessInstance restCallInstance = camundaMonitor.getRestTemplate().searchProcessInstancesSingleResult(restInstanceQuery);
-            assertNotNull(restCallInstance);
 
             if(processor.equals("LEGACY"))
                 runProcessWorkerSubProcess(t, camundaMonitor, new ToProcessLegacyDTOId(auditableT1Ids.get(i).getRrnr(), userId));
+
+            else if(processor.equals("DASYS"))
+                runProcessEmployeeSubProcess(t, camundaMonitor);
+
         }
 
     }
@@ -255,7 +256,7 @@ public class BPMNProcessTest {
         HashMap<String, Variable> variableMap = new HashMap<>();
         variableMap.put("hasLabRequests", new Variable(true));
         variableMap.put("hasVaccinations", new Variable(true));
-        variableMap.putAll(id.toVariableMap(objectMapper));
+        variableMap.putAll(id.toVariableMap(objectMapper.convertValue(id, Map.class)));
         MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Check_Needed_Processing_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
@@ -266,15 +267,15 @@ public class BPMNProcessTest {
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
 
-        runLegacyProcessorSubProcess(legacyProcessorToken, camundaMonitor);
+        runLegacyProcessorSubProcess(legacyProcessorToken, camundaMonitor, id);
 
         CamundaToken egelProcessorToken = CamundaToken.randomBKToken(token);
-        variableMap = VariableUtil.mapFromSingleVariable("BK_EgelProcessor", new Variable(legacyProcessorToken.getCurrentProcessBK()));
+        variableMap = VariableUtil.mapFromSingleVariable("BK_EgelProcessor", new Variable(egelProcessorToken.getCurrentProcessBK()));
         messageCorrelationParameters = new MessageCorrelationParameters("Send_to_Egel_Processor_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
 
-        runEgelProcessorSubProcess(legacyProcessorToken, camundaMonitor);
+        runEgelProcessorSubProcess(egelProcessorToken, camundaMonitor, new ToProcessEgeld(id.getRrnr(), id.getUserId()));
 
         int numberOfVaccinnes = 2;
         ArrayList<String> bkList = new ArrayList<>();
@@ -288,19 +289,22 @@ public class BPMNProcessTest {
         variableMap = VariableUtil.mapFromSingleVariable("Vaccinnet_BKs", VariableUtil.createVariableFromCollection(bkList));
         messageCorrelationParameters = new MessageCorrelationParameters("Send_to_Vaccinnet_Processor_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
+        Random r = new Random();
 
         for(int i =0;i < numberOfVaccinnes;i++){
             Thread.sleep(300);
             CamundaToken tokenVaccine = tokensList.get(i);
 
-            runVaccinnetProcessorSubProcess(tokenVaccine, camundaMonitor);
+            runVaccinnetProcessorSubProcess(tokenVaccine, camundaMonitor, new VaccinationDTOId(id.getRrnr(), String.valueOf(r.nextInt()), String.valueOf(r.nextInt())));
         }
 
     }
 
-    private void runLegacyProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor) throws InterruptedException {
+    private void runLegacyProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor, ToProcessLegacyDTOId id) throws InterruptedException {
 
-        MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Start_Legacy_Processing_msg", null);
+        HashMap<String, Variable> variableMap = new HashMap<>();
+        variableMap.putAll(id.toVariableMap(objectMapper.convertValue(id, Map.class)));
+        MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Start_Legacy_Processing_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
 
@@ -337,41 +341,59 @@ public class BPMNProcessTest {
         Thread.sleep(300);
     }
 
-    private void runEgelProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor) throws InterruptedException {
+    private void runEgelProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor, ToProcessEgeld id) throws InterruptedException {
 
-        MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("EgelProcessor_msg", null);
+        HashMap<String, Variable> variableMap = new HashMap<>();
+        variableMap.putAll(id.toVariableMap(objectMapper.convertValue(id, Map.class)));
+        MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("EgelProcessor_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
 
-        int numberOfRequests = 2;
+        int numberOfRequests = 5;
 
-        HashMap<String, Variable> variableMap = VariableUtil.mapFromSingleVariable("numberOfLabRequest", new Variable(numberOfRequests, CamundaType.INT));
+        variableMap = VariableUtil.mapFromSingleVariable("numberOfLabRequest", new Variable(numberOfRequests, CamundaType.INT));
         messageCorrelationParameters = new MessageCorrelationParameters("EgelController_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
         Thread.sleep(300);
 
+
         ArrayList<String> egelUuids = new ArrayList<>();
         for(int i =0;i < numberOfRequests;i++){
             egelUuids.add(UUID.randomUUID().toString());
-            variableMap = VariableUtil.mapFromSingleVariable("oldLabRequestUUID ", new Variable(String.valueOf(i), CamundaType.STRING));
-            variableMap.put("labRequestUUID", new Variable(egelUuids.get(i)));
+            variableMap = VariableUtil.mapFromSingleVariable("oldLabRequestUuid ", new Variable(String.valueOf(i), CamundaType.STRING));
+            //variableMap.put("labRequestUUID", new Variable(egelUuids.get(i)));
+            LabRequestDTOId labRequestDTOId = new LabRequestDTOId(egelUuids.get(i), String.valueOf(i), String.valueOf(i) , String.valueOf(i));
+            variableMap.putAll(labRequestDTOId.toVariableMap(objectMapper.convertValue(labRequestDTOId, Map.class)));
             messageCorrelationParameters = new MessageCorrelationParameters("Create_new_lab_request_msg", variableMap);
             camundaMonitor.correlateMessage(token, messageCorrelationParameters);
             Thread.sleep(300);
 
-            camundaMonitor.sendSignal("Cancel_" + egelUuids.get(i) + "_msg", null);
+            variableMap = VariableUtil.mapFromSingleVariable("labRequestStatus", new Variable("SENT"));
+            messageCorrelationParameters = new MessageCorrelationParameters("Process_Egel_" + labRequestDTOId.getLabRequestUuid() + "_msg", variableMap);
+            camundaMonitor.correlateMessage(null, messageCorrelationParameters);
+
             Thread.sleep(300);
         }
     }
 
-    private void runVaccinnetProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor) throws InterruptedException {
+    private void runVaccinnetProcessorSubProcess(CamundaToken token, CamundaMonitor camundaMonitor, VaccinationDTOId id) throws InterruptedException {
 
-        HashMap<String, Variable> variableMap = VariableUtil.mapFromSingleVariable("Vaccinnet_Error_Message", new Variable("Hoi"));
+        Map<String, Variable> variableMap = id.toVariableMap(objectMapper.convertValue(id, Map.class));
         MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Vaccinnet_Controller_msg", variableMap);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);
     }
 
-    private void raiseError(CamundaToken token, CamundaMonitor camundaMonitor, boolean skipIncident) throws InterruptedException {
+    private void runProcessEmployeeSubProcess(CamundaToken token, CamundaMonitor camundaMonitor) throws InterruptedException {
+
+        HashMap<String, Variable> variableMap = new HashMap<>();
+        CamundaToken dasysProcessorToken = CamundaToken.randomBKToken(token);
+        variableMap = VariableUtil.mapFromSingleVariable("BK_DasysProcessor", new Variable(dasysProcessorToken.getCurrentProcessBK()));
+        MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Process_Employee_Start_msg", variableMap);
+        camundaMonitor.correlateMessage(token, messageCorrelationParameters);
+        Thread.sleep(300);
+    }
+
+    private void raiseIncident(CamundaToken token, CamundaMonitor camundaMonitor, boolean skipIncident) throws InterruptedException {
         Map<String, Variable> vars = VariableUtil.mapFromSingleVariable("error_message", new Variable("Error msg", CamundaType.STRING));
         MessageCorrelationParameters messageCorrelationParameters = new MessageCorrelationParameters("Raise_Error_msg", vars);
         camundaMonitor.correlateMessage(token, messageCorrelationParameters);

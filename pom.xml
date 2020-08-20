@@ -44,10 +44,11 @@
             <version>3.4.0</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-        </dependency>
+        </dependency>-->
+
 
         <dependency>
             <groupId>mysql</groupId>
@@ -77,7 +78,6 @@
             <groupId>be.yelido</groupId>
             <artifactId>camunda-module</artifactId>
             <version>1.0</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -89,7 +89,11 @@
             <groupId>org.camunda.bpm.cockpit.plugin</groupId>
             <artifactId>cockpit-sample-plugin</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -99,6 +103,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <executable>true</executable>
+                </configuration>
             </plugin>
         </plugins>
     </build>

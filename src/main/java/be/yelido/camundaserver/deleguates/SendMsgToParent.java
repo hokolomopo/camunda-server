@@ -25,17 +25,22 @@ public class SendMsgToParent implements JavaDelegate {
             parentLevelString = (String) parentLevelExpr.getValue(execution);
         int parentLevel = Integer.parseInt(parentLevelString);
 
-        DelegateExecution superExecution = execution;
-        int i = 0;
-        do {
-            superExecution = superExecution.getProcessInstance().getSuperExecution();
-            System.out.println(superExecution.getId());
-            i ++;
-        }while(superExecution.getProcessInstance().getSuperExecution() != null && i < parentLevel);
+        DelegateExecution targetExecution = execution;
+
+        if(parentLevel > 0){
+            int i = 0;
+            do {
+                targetExecution = targetExecution.getProcessInstance().getSuperExecution();
+                System.out.println(targetExecution.getId());
+                i ++;
+            }while(targetExecution.getProcessInstance().getSuperExecution() != null && i < parentLevel);
+        }
+        else {
+            targetExecution = execution.getProcessInstance();
+        }
 
         MessageCorrelationBuilder builder = runtimeService.createMessageCorrelation(msgNameStr)
-                .processInstanceId(superExecution.getProcessInstanceId());
-        System.out.println("Sending msg type : " + msgNameStr);
+                .processInstanceId(targetExecution.getProcessInstanceId());
 
         if (var1 != null)
             setVariable(var1, execution, builder);

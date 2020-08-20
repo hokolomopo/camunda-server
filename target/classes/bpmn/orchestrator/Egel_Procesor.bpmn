@@ -1,83 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_13p520a" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:process id="Egel_Processor" name="Egel_Processor" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1">
+    <bpmn:startEvent id="Start_Egel_Processor">
       <bpmn:outgoing>Flow_1xkcct9</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:receiveTask id="Egel_Processor_act" name="Egel Processor" camunda:asyncBefore="true" messageRef="Message_089um7u">
       <bpmn:incoming>Flow_1xkcct9</bpmn:incoming>
       <bpmn:outgoing>Flow_0cgkk9p</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:sequenceFlow id="Flow_1xkcct9" sourceRef="StartEvent_1" targetRef="Egel_Processor_act" />
+    <bpmn:sequenceFlow id="Flow_1xkcct9" sourceRef="Start_Egel_Processor" targetRef="Egel_Processor_act" />
     <bpmn:sequenceFlow id="Flow_0cgkk9p" sourceRef="Egel_Processor_act" targetRef="Egel_Controller" />
     <bpmn:subProcess id="New_Lab_Request" name="Create new Request">
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_1fhmuob</bpmn:incoming>
       <bpmn:outgoing>Flow_1xj9ab2</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics isSequential="true">
+      <bpmn:multiInstanceLoopCharacteristics isSequential="true" camunda:asyncBefore="true">
         <bpmn:loopCardinality xsi:type="bpmn:tFormalExpression">${numberOfLabRequest}</bpmn:loopCardinality>
       </bpmn:multiInstanceLoopCharacteristics>
-      <bpmn:startEvent id="Event_0g94u4i">
+      <bpmn:startEvent id="Start_Create_Lab_Request">
         <bpmn:extensionElements>
           <camunda:executionListener class="be.yelido.camundaserver.deleguates.InitLocalVariables" event="end">
-            <camunda:field name="var1">
-              <camunda:expression>oldLabRequestUUID</camunda:expression>
-            </camunda:field>
-            <camunda:field name="var2">
-              <camunda:expression>labRequestStatus</camunda:expression>
-            </camunda:field>
-            <camunda:field name="var3">
-              <camunda:string>labRequestUUID</camunda:string>
+            <camunda:field name="vars">
+              <camunda:expression>oldLabRequestUuid,labRequestUuid,number,id,label</camunda:expression>
             </camunda:field>
           </camunda:executionListener>
         </bpmn:extensionElements>
         <bpmn:outgoing>Flow_07d90on</bpmn:outgoing>
       </bpmn:startEvent>
-      <bpmn:exclusiveGateway id="Gateway_05wn6mq" name="Check if we need to invalidate old lab request" default="Flow_0s65bp4">
+      <bpmn:exclusiveGateway id="Gateway_OldLabRequest" name="Check if we need to invalidate old lab request" default="Flow_0s65bp4">
         <bpmn:incoming>Flow_1n1tx7o</bpmn:incoming>
         <bpmn:outgoing>Flow_1g8a10v</bpmn:outgoing>
         <bpmn:outgoing>Flow_0s65bp4</bpmn:outgoing>
       </bpmn:exclusiveGateway>
-      <bpmn:sequenceFlow id="Flow_1g8a10v" name="OldLabRequestUUID != null" sourceRef="Gateway_05wn6mq" targetRef="Activity_0j4gyzt">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable("oldLabRequestUUID") != null}</bpmn:conditionExpression>
+      <bpmn:sequenceFlow id="Flow_1g8a10v" name="OldLabRequestUUID != null" sourceRef="Gateway_OldLabRequest" targetRef="Invalidate_Old_Lab_Request">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable("oldLabRequestUuid") != null &amp;&amp; execution.getVariable("oldLabRequestUuid") !=""}</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="Flow_07d90on" sourceRef="Event_0g94u4i" targetRef="Create_new_lab_request" />
-      <bpmn:sequenceFlow id="Flow_1n1tx7o" sourceRef="Create_new_lab_request" targetRef="Gateway_05wn6mq" />
-      <bpmn:receiveTask id="Create_new_lab_request" name="Create new lab request" camunda:asyncBefore="true" messageRef="Message_1a9eaxn">
+      <bpmn:sequenceFlow id="Flow_07d90on" sourceRef="Start_Create_Lab_Request" targetRef="Create_new_lab_request" />
+      <bpmn:sequenceFlow id="Flow_1n1tx7o" sourceRef="Create_new_lab_request" targetRef="Gateway_OldLabRequest" />
+      <bpmn:receiveTask id="Create_new_lab_request" name="Create new lab request" messageRef="Message_1a9eaxn">
         <bpmn:incoming>Flow_07d90on</bpmn:incoming>
         <bpmn:outgoing>Flow_1n1tx7o</bpmn:outgoing>
       </bpmn:receiveTask>
-      <bpmn:sequenceFlow id="Flow_0s65bp4" sourceRef="Gateway_05wn6mq" targetRef="Event_1r4ug97" />
-      <bpmn:sequenceFlow id="Flow_00nk64k" sourceRef="Activity_0j4gyzt" targetRef="Event_1r4ug97" />
-      <bpmn:endEvent id="Event_1r4ug97" camunda:asyncBefore="true">
+      <bpmn:sequenceFlow id="Flow_0s65bp4" sourceRef="Gateway_OldLabRequest" targetRef="End_Create_Lab_Request" />
+      <bpmn:sequenceFlow id="Flow_00nk64k" sourceRef="Invalidate_Old_Lab_Request" targetRef="End_Create_Lab_Request" />
+      <bpmn:endEvent id="End_Create_Lab_Request" name="Start Egel Request" camunda:asyncBefore="true">
         <bpmn:incoming>Flow_0s65bp4</bpmn:incoming>
         <bpmn:incoming>Flow_00nk64k</bpmn:incoming>
         <bpmn:messageEventDefinition id="MessageEventDefinition_0ojqoa0" camunda:class="be.yelido.camundaserver.deleguates.SendMsgToParent">
           <bpmn:extensionElements>
             <camunda:field name="parentLevelExpr">
-              <camunda:expression>1</camunda:expression>
+              <camunda:expression>0</camunda:expression>
             </camunda:field>
             <camunda:field name="msgName">
               <camunda:expression>Start_Egel_Process_msg</camunda:expression>
             </camunda:field>
             <camunda:field name="var1">
-              <camunda:expression>labRequestUUID</camunda:expression>
-            </camunda:field>
-            <camunda:field name="var2">
-              <camunda:expression>labRequestStatus</camunda:expression>
+              <camunda:expression>labRequestUuid</camunda:expression>
             </camunda:field>
           </bpmn:extensionElements>
         </bpmn:messageEventDefinition>
       </bpmn:endEvent>
-      <bpmn:serviceTask id="Activity_0j4gyzt" name="Invalidate old lab request" camunda:asyncBefore="true" camunda:class="be.yelido.camundaserver.deleguates.InvalidateLabRequest">
+      <bpmn:serviceTask id="Invalidate_Old_Lab_Request" name="Invalidate old lab request" camunda:asyncBefore="true" camunda:class="be.yelido.camundaserver.deleguates.InvalidateLabRequest">
         <bpmn:incoming>Flow_1g8a10v</bpmn:incoming>
         <bpmn:outgoing>Flow_00nk64k</bpmn:outgoing>
       </bpmn:serviceTask>
     </bpmn:subProcess>
     <bpmn:sequenceFlow id="Flow_1fhmuob" sourceRef="Egel_Controller" targetRef="New_Lab_Request" />
-    <bpmn:endEvent id="Event_0pfcrgq">
+    <bpmn:endEvent id="End_Egel_Processor">
       <bpmn:incoming>Flow_1xj9ab2</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1xj9ab2" sourceRef="New_Lab_Request" targetRef="Event_0pfcrgq" />
+    <bpmn:sequenceFlow id="Flow_1xj9ab2" sourceRef="New_Lab_Request" targetRef="End_Egel_Processor" />
     <bpmn:receiveTask id="Egel_Controller" name="Egel Controller" camunda:asyncBefore="true" messageRef="Message_1cl9cvf">
       <bpmn:incoming>Flow_0cgkk9p</bpmn:incoming>
       <bpmn:outgoing>Flow_1fhmuob</bpmn:outgoing>
@@ -87,7 +79,7 @@
         <bpmn:outgoing>Flow_1nliut8</bpmn:outgoing>
         <bpmn:messageEventDefinition id="MessageEventDefinition_1yrj62l" messageRef="Message_1nxs9t9" />
       </bpmn:startEvent>
-      <bpmn:endEvent id="Event_0mxa767">
+      <bpmn:endEvent id="Send_Camunda_Error">
         <bpmn:incoming>Flow_08jrfxo</bpmn:incoming>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_19pt2mo" errorRef="Error_08nncyc" />
       </bpmn:endEvent>
@@ -95,8 +87,48 @@
         <bpmn:incoming>Flow_1nliut8</bpmn:incoming>
         <bpmn:outgoing>Flow_08jrfxo</bpmn:outgoing>
       </bpmn:receiveTask>
-      <bpmn:sequenceFlow id="Flow_08jrfxo" sourceRef="Activity_Incident" targetRef="Event_0mxa767" />
+      <bpmn:sequenceFlow id="Flow_08jrfxo" sourceRef="Activity_Incident" targetRef="Send_Camunda_Error" />
       <bpmn:sequenceFlow id="Flow_1nliut8" sourceRef="Error_Event" targetRef="Activity_Incident" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="Egel_Request" name="Egel Request" triggeredByEvent="true">
+      <bpmn:startEvent id="Event_1ssyutl" camunda:asyncBefore="true" isInterrupting="false">
+        <bpmn:extensionElements>
+          <camunda:executionListener class="be.yelido.camundaserver.deleguates.SetScopeToLocal" event="start">
+            <camunda:field name="vars">
+              <camunda:expression>labRequestUuid,labRequestStatus</camunda:expression>
+            </camunda:field>
+          </camunda:executionListener>
+        </bpmn:extensionElements>
+        <bpmn:outgoing>Flow_1gzvzbi</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_18zdblb" messageRef="Message_07d1vl1" />
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="Activity_00c0ogy" name="Wait for processing" messageRef="Message_1k77dxi">
+        <bpmn:incoming>Flow_0vphqf1</bpmn:incoming>
+        <bpmn:incoming>Flow_1gzvzbi</bpmn:incoming>
+        <bpmn:outgoing>Flow_1mr85b1</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:endEvent id="Event_00rf81p">
+        <bpmn:incoming>Flow_0e33r7j</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:exclusiveGateway id="Gateway_0ajk63e" name="Check if request status is SENT" default="Flow_0vphqf1">
+        <bpmn:incoming>Flow_1mr85b1</bpmn:incoming>
+        <bpmn:outgoing>Flow_02cytgl</bpmn:outgoing>
+        <bpmn:outgoing>Flow_0vphqf1</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="Event_12mmk54">
+        <bpmn:incoming>Flow_02cytgl</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_02cytgl" sourceRef="Gateway_0ajk63e" targetRef="Event_12mmk54">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${labRequestStatus == "SENT"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="Flow_0vphqf1" sourceRef="Gateway_0ajk63e" targetRef="Activity_00c0ogy" />
+      <bpmn:sequenceFlow id="Flow_1mr85b1" sourceRef="Activity_00c0ogy" targetRef="Gateway_0ajk63e" />
+      <bpmn:sequenceFlow id="Flow_0e33r7j" sourceRef="Event_1yxw6yq" targetRef="Event_00rf81p" />
+      <bpmn:sequenceFlow id="Flow_1gzvzbi" sourceRef="Event_1ssyutl" targetRef="Activity_00c0ogy" />
+      <bpmn:boundaryEvent id="Event_1yxw6yq" name="Cancel" attachedToRef="Activity_00c0ogy">
+        <bpmn:outgoing>Flow_0e33r7j</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_0n6mv9w" messageRef="Message_1s6jeic" />
+      </bpmn:boundaryEvent>
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_089um7u" name="EgelProcessor_msg" />
@@ -105,104 +137,172 @@
   <bpmn:message id="Message_1nxs9t9" name="Raise_Error_msg" />
   <bpmn:error id="Error_08nncyc" name="Execution_Error" errorCode="Execution_Error" camunda:errorMessage="${error_message}" />
   <bpmn:message id="Message_1dxnl1x" name="Incident_msg" />
+  <bpmn:message id="Message_0pf3aqa" name="Start_Egel_Process_msg" />
+  <bpmn:message id="Message_0sxy41s" name="Process_Egel_${labRequestUuid}_msg" />
+  <bpmn:message id="Message_07d1vl1" name="Start_Egel_Process_msg" />
+  <bpmn:message id="Message_1k77dxi" name="Process_Egel_${labRequestUuid}_msg" />
+  <bpmn:message id="Message_1s6jeic" name="Cancel_${labRequestUuid}_msg" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Egel_Processor">
       <bpmndi:BPMNEdge id="Flow_1xj9ab2_di" bpmnElement="Flow_1xj9ab2">
-        <di:waypoint x="1080" y="439" />
-        <di:waypoint x="1182" y="439" />
+        <di:waypoint x="1080" y="559" />
+        <di:waypoint x="1182" y="559" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1fhmuob_di" bpmnElement="Flow_1fhmuob">
-        <di:waypoint x="470" y="439" />
-        <di:waypoint x="520" y="439" />
+        <di:waypoint x="470" y="559" />
+        <di:waypoint x="520" y="559" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0cgkk9p_di" bpmnElement="Flow_0cgkk9p">
-        <di:waypoint x="330" y="439" />
-        <di:waypoint x="370" y="439" />
+        <di:waypoint x="330" y="559" />
+        <di:waypoint x="370" y="559" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xkcct9_di" bpmnElement="Flow_1xkcct9">
-        <di:waypoint x="195" y="439" />
-        <di:waypoint x="230" y="439" />
+        <di:waypoint x="195" y="559" />
+        <di:waypoint x="230" y="559" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="159" y="421" width="36" height="36" />
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="Start_Egel_Processor">
+        <dc:Bounds x="159" y="541" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_01966xh_di" bpmnElement="Egel_Processor_act">
-        <dc:Bounds x="230" y="399" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0pfcrgq_di" bpmnElement="Event_0pfcrgq">
-        <dc:Bounds x="1182" y="421" width="36" height="36" />
+        <dc:Bounds x="230" y="519" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ziy2ni_di" bpmnElement="New_Lab_Request" isExpanded="true">
-        <dc:Bounds x="520" y="307" width="560" height="263" />
+        <dc:Bounds x="520" y="427" width="560" height="263" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_00nk64k_di" bpmnElement="Flow_00nk64k">
-        <di:waypoint x="920" y="370" />
-        <di:waypoint x="970" y="370" />
-        <di:waypoint x="970" y="469" />
+        <di:waypoint x="920" y="490" />
+        <di:waypoint x="970" y="490" />
+        <di:waypoint x="970" y="589" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0s65bp4_di" bpmnElement="Flow_0s65bp4">
-        <di:waypoint x="795" y="487" />
-        <di:waypoint x="952" y="487" />
+        <di:waypoint x="795" y="607" />
+        <di:waypoint x="952" y="607" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1n1tx7o_di" bpmnElement="Flow_1n1tx7o">
-        <di:waypoint x="710" y="487" />
-        <di:waypoint x="745" y="487" />
+        <di:waypoint x="710" y="607" />
+        <di:waypoint x="745" y="607" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_07d90on_di" bpmnElement="Flow_07d90on">
-        <di:waypoint x="578" y="487" />
-        <di:waypoint x="610" y="487" />
+        <di:waypoint x="578" y="606" />
+        <di:waypoint x="594" y="606" />
+        <di:waypoint x="594" y="607" />
+        <di:waypoint x="610" y="607" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1g8a10v_di" bpmnElement="Flow_1g8a10v">
-        <di:waypoint x="770" y="462" />
-        <di:waypoint x="770" y="370" />
-        <di:waypoint x="820" y="370" />
+        <di:waypoint x="770" y="582" />
+        <di:waypoint x="770" y="490" />
+        <di:waypoint x="820" y="490" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="728" y="336" width="85" height="27" />
+          <dc:Bounds x="728" y="456" width="85" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_0g94u4i_di" bpmnElement="Event_0g94u4i">
-        <dc:Bounds x="542" y="469" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_05wn6mq_di" bpmnElement="Gateway_05wn6mq" isMarkerVisible="true">
-        <dc:Bounds x="745" y="462" width="50" height="50" />
+      <bpmndi:BPMNShape id="Event_0g94u4i_di" bpmnElement="Start_Create_Lab_Request">
+        <dc:Bounds x="542" y="588" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="728" y="510" width="85" height="40" />
+          <dc:Bounds x="523" y="512" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_05wn6mq_di" bpmnElement="Gateway_OldLabRequest" isMarkerVisible="true">
+        <dc:Bounds x="745" y="582" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="728" y="630" width="85" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1n4esfk_di" bpmnElement="Create_new_lab_request">
-        <dc:Bounds x="610" y="447" width="100" height="80" />
+        <dc:Bounds x="610" y="567" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_06uyh5r_di" bpmnElement="Event_1r4ug97">
-        <dc:Bounds x="952" y="469" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_152jli6_di" bpmnElement="Activity_0j4gyzt">
-        <dc:Bounds x="820" y="330" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_179iizp_di" bpmnElement="Egel_Controller">
-        <dc:Bounds x="370" y="399" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0nzzhjj_di" bpmnElement="Activity_0nzzhjj" isExpanded="true">
-        <dc:Bounds x="250" y="80" width="303" height="120" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1nliut8_di" bpmnElement="Flow_1nliut8">
-        <di:waypoint x="318" y="140" />
-        <di:waypoint x="350" y="140" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_08jrfxo_di" bpmnElement="Flow_08jrfxo">
-        <di:waypoint x="450" y="140" />
-        <di:waypoint x="497" y="140" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_1bzhbaa_di" bpmnElement="Error_Event">
-        <dc:Bounds x="282" y="122" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_06uyh5r_di" bpmnElement="End_Create_Lab_Request">
+        <dc:Bounds x="952" y="589" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="287" y="165" width="26" height="14" />
+          <dc:Bounds x="946" y="632" width="49" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0mxa767_di" bpmnElement="Event_0mxa767">
-        <dc:Bounds x="497" y="122" width="36" height="36" />
+      <bpmndi:BPMNShape id="Activity_152jli6_di" bpmnElement="Invalidate_Old_Lab_Request">
+        <dc:Bounds x="820" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0pfcrgq_di" bpmnElement="End_Egel_Processor">
+        <dc:Bounds x="1182" y="541" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1175" y="464" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_179iizp_di" bpmnElement="Egel_Controller">
+        <dc:Bounds x="370" y="519" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0nzzhjj_di" bpmnElement="Activity_0nzzhjj" isExpanded="true">
+        <dc:Bounds x="250" y="200" width="303" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1nliut8_di" bpmnElement="Flow_1nliut8">
+        <di:waypoint x="318" y="260" />
+        <di:waypoint x="350" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08jrfxo_di" bpmnElement="Flow_08jrfxo">
+        <di:waypoint x="450" y="260" />
+        <di:waypoint x="497" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1bzhbaa_di" bpmnElement="Error_Event">
+        <dc:Bounds x="282" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="287" y="285" width="26" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mxa767_di" bpmnElement="Send_Camunda_Error">
+        <dc:Bounds x="497" y="242" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0nn2zvx_di" bpmnElement="Activity_Incident">
-        <dc:Bounds x="350" y="100" width="100" height="80" />
+        <dc:Bounds x="350" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ez8m0v_di" bpmnElement="Egel_Request" isExpanded="true">
+        <dc:Bounds x="830" y="80" width="690" height="310" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1gzvzbi_di" bpmnElement="Flow_1gzvzbi">
+        <di:waypoint x="888" y="201" />
+        <di:waypoint x="914" y="201" />
+        <di:waypoint x="914" y="200" />
+        <di:waypoint x="940" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e33r7j_di" bpmnElement="Flow_0e33r7j">
+        <di:waypoint x="1040" y="258" />
+        <di:waypoint x="1040" y="320" />
+        <di:waypoint x="1262" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mr85b1_di" bpmnElement="Flow_1mr85b1">
+        <di:waypoint x="1040" y="200" />
+        <di:waypoint x="1185" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vphqf1_di" bpmnElement="Flow_0vphqf1">
+        <di:waypoint x="1210" y="175" />
+        <di:waypoint x="1210" y="110" />
+        <di:waypoint x="990" y="110" />
+        <di:waypoint x="990" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02cytgl_di" bpmnElement="Flow_02cytgl">
+        <di:waypoint x="1235" y="200" />
+        <di:waypoint x="1392" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1ssyutl_di" bpmnElement="Event_1ssyutl">
+        <dc:Bounds x="852" y="183" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00c0ogy_di" bpmnElement="Activity_00c0ogy">
+        <dc:Bounds x="940" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_00rf81p_di" bpmnElement="Event_00rf81p">
+        <dc:Bounds x="1262" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0ajk63e_di" bpmnElement="Gateway_0ajk63e" isMarkerVisible="true">
+        <dc:Bounds x="1185" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1170" y="232" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_12mmk54_di" bpmnElement="Event_12mmk54">
+        <dc:Bounds x="1392" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ovhdpi_di" bpmnElement="Event_1yxw6yq">
+        <dc:Bounds x="1022" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1068" y="233" width="35" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
