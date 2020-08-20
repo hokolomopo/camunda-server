@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: be.yelido.camundaserver.BPMNProcessTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.165 s <<< FAILURE! - in be.yelido.camundaserver.BPMNProcessTest
-runTestProcess  Time elapsed: 0.993 s  <<< ERROR!
-org.springframework.web.client.HttpServerErrorException$InternalServerError: 500 : [{"type":"RestException","message":"Cannot instantiate process definition Process_Worker:1:2b713998-a734-11ea-ad23-0a0027000004: Cannot perform instruction: Start after activity 'Send_to_Vaccinnet_Processor_msg'; Activity 'Send_to_Vaccinnet_Processor_msg' does not exist: activity is null"}]
-	at be.yelido.camundaserver.BPMNProcessTest.runTestProcess(BPMNProcessTest.java:413)
-
